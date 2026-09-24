@@ -31,6 +31,15 @@ export interface Employee {
   nb_enfants: number;
   bank_account: string;
   notes: string;
+  transport?: string;
+  national_id_type?: string;
+  nuisance_pct?: number;
+  ifsp_pct?: number;
+  ifep_pct?: number;
+  prime_technicite?: number;
+  prime_sujetion?: number;
+  prime_responsabilite?: number;
+  prime_zone?: number;
   created_at: string;
   updated_at: string;
 }
@@ -72,23 +81,6 @@ export interface Leave {
   approved_by: string;
 }
 
-export interface Payroll {
-  id: number;
-  employee_id: number;
-  first_name?: string;
-  last_name?: string;
-  department_name?: string;
-  position?: string;
-  month: number;
-  year: number;
-  base_salary: number;
-  bonuses: number;
-  deductions: number;
-  net_salary: number;
-  status: string;
-  paid_date: string;
-}
-
 export interface Stats {
   totalEmployees: number;
   activeEmployees: number;
@@ -98,6 +90,7 @@ export interface Stats {
   totalPayroll: number;
   recentEmployees: any[];
   departmentStats: any[];
+  expiringContracts: number;
 }
 
 export interface Settings {

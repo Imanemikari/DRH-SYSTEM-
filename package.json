@@ -23,8 +23,9 @@
       "node_modules/**/*"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "electron/icon.ico"
+      "target": "dir",
+      "icon": "electron/icon.ico",
+      "sign": false
     },
     "nsis": {
       "oneClick": false,
@@ -37,6 +38,7 @@
     "jszip": "^3.10.1",
     "mammoth": "^1.12.1",
     "ole-doc": "^0.1.1",
+    "qrcode-generator": "^2.0.4",
     "sql.js": "^1.14.2",
     "word-extractor": "^1.0.4"
   },

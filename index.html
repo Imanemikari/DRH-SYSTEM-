@@ -11,7 +11,17 @@
     <style>
       html[dir="ltr"] body { font-family: 'Inter', 'Segoe UI', sans-serif; }
       html[dir="rtl"] body { font-family: 'Noto Kufi Arabic', 'Inter', 'Segoe UI', sans-serif; }
+      html.dark body { background: #0f172a; }
     </style>
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('drh-theme');
+          var isDark = t ? (t === 'dark') : true;
+          if (isDark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

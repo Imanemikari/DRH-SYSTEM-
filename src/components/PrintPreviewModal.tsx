@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { X, Printer } from 'lucide-react';
 import { useLang } from '../context/LangContext';
+import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 
 export interface PrintField {
   key: string;
   label: string;
   getValue: (item: any) => string;
   defaultVisible?: boolean;
+  align?: 'left' | 'center' | 'right';
 }
+
+const alignOf = (f: PrintField) => f.align || 'right';
+const alignCls = (f: PrintField) => alignOf(f) === 'left' ? 'text-left' : alignOf(f) === 'center' ? 'text-center' : 'text-right';
 
 interface PrintPreviewModalProps {
   title: string;
@@ -32,15 +37,15 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
   const visibleFields = fields.filter(f => selectedFields.includes(f.key));
 
   const handlePrint = () => {
-    const headers = visibleFields.map(f => `<th style="background:#1e40af;color:white;padding:8px;text-align:right;border:1px solid #ccc;font-size:12px">${f.label}</th>`).join('');
+    const headers = visibleFields.map(f => `<th style="background:#14305a;color:white;padding:8px;text-align:${alignOf(f)};border:1px solid #ccc;font-size:12px">${f.label}</th>`).join('');
     const rows = data.map(item => {
-      const cells = visibleFields.map(f => `<td style="padding:8px;border:1px solid #ccc;text-align:right;font-size:12px">${f.getValue(item) || '-'}</td>`).join('');
+      const cells = visibleFields.map(f => `<td style="padding:8px;border:1px solid #ccc;text-align:${alignOf(f)};font-size:12px">${f.getValue(item) || '-'}</td>`).join('');
       return `<tr>${cells}</tr>`;
     }).join('');
 
     const content = `
-      <div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #1e40af;padding-bottom:15px">
-        <div style="font-size:20px;font-weight:bold;color:#1e40af">${title}</div>
+      <div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #14305a;padding-bottom:15px">
+        <div style="font-size:20px;font-weight:bold;color:#14305a">${title}</div>
         <div style="color:#666;font-size:12px">${t('printDate')}: ${new Date().toLocaleDateString(lang === 'ar' ? 'ar-TN' : 'fr-TN')}</div>
       </div>
       <table style="width:100%;border-collapse:collapse;margin:10px 0">
@@ -48,6 +53,7 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
         ${rows}
       </table>
       <p style="margin-top:10px;font-size:12px;color:#666">${t('empCount')}: ${data.length}</p>
+      ${sealFooterHtml(makeSeal({ title, rows: [visibleFields.map(f => f.label), ...data.map(item => visibleFields.map(f => f.getValue(item) || '-'))] }))}
     `;
     const w = window.open('', '_blank', 'width=1100,height=700');
     if (w) { w.document.write(`<html dir="${dir}"><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:20px">${content}</body></html>`); w.document.close(); w.print(); }
@@ -55,7 +61,7 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-scaleIn" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white dark:!bg-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-scaleIn" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
           <h2 className="text-lg font-bold text-surface-800">{t('printPreview')} — {title}</h2>
           <button onClick={onClose} className="p-2 hover:bg-surface-100 rounded-lg"><X className="w-5 h-5" /></button>
@@ -65,15 +71,15 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold text-surface-700">{t('printSelectFields')}</p>
             <div className="flex gap-2">
-              <button onClick={selectAll} className="text-xs text-primary-500 hover:text-primary-600 font-medium">{t('printSelectAll')}</button>
+              <button onClick={selectAll} className="text-xs text-[#14305a] hover:text-[#20487c] font-medium dark:!text-amber-300">{t('printSelectAll')}</button>
               <span className="text-surface-300">|</span>
               <button onClick={selectNone} className="text-xs text-surface-500 hover:text-surface-600 font-medium">{t('printSelectNone')}</button>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {fields.map(field => (
-              <label key={field.key} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all border ${selectedFields.includes(field.key) ? 'bg-primary-50 border-primary-200 text-primary-700' : 'bg-white border-surface-200 text-surface-500 hover:bg-surface-50'}`}>
-                <input type="checkbox" checked={selectedFields.includes(field.key)} onChange={() => toggleField(field.key)} className="w-3.5 h-3.5 rounded border-surface-300 text-primary-500 focus:ring-primary-500" />
+              <label key={field.key} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all border ${selectedFields.includes(field.key) ? 'bg-[#f3f6fc] border-[#14305a]/30 text-[#14305a] dark:!bg-slate-700 dark:!border-amber-500/40 dark:!text-amber-300' : 'bg-white border-slate-200 text-surface-500 hover:bg-slate-50 dark:!bg-slate-800 dark:!border-slate-600 dark:!text-slate-300 dark:!hover:bg-slate-700'}`}>
+                <input type="checkbox" checked={selectedFields.includes(field.key)} onChange={() => toggleField(field.key)} className="w-3.5 h-3.5 rounded border-slate-300 accent-[#14305a]" />
                 {field.label}
               </label>
             ))}
@@ -88,9 +94,9 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
             <div className="overflow-x-auto border border-surface-200 rounded-xl">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-primary-500 text-white">
+                  <tr className="bg-gradient-to-r from-[#14305a] to-[#20487c] text-white">
                     {visibleFields.map(f => (
-                      <th key={f.key} className="px-3 py-2.5 text-right text-xs font-semibold whitespace-nowrap">{f.label}</th>
+                      <th key={f.key} className={`px-3 py-2.5 ${alignCls(f)} text-xs font-semibold whitespace-nowrap`}>{f.label}</th>
                     ))}
                   </tr>
                 </thead>
@@ -98,7 +104,7 @@ export default function PrintPreviewModal({ title, fields, data, onClose }: Prin
                   {data.map((item, i) => (
                     <tr key={i} className="hover:bg-surface-50/50">
                       {visibleFields.map(f => (
-                        <td key={f.key} className="px-3 py-2 text-right text-xs text-surface-600 whitespace-nowrap">{f.getValue(item) || '-'}</td>
+                        <td key={f.key} className={`px-3 py-2 ${alignCls(f)} text-xs text-surface-600 whitespace-nowrap`}>{f.getValue(item) || '-'}</td>
                       ))}
                     </tr>
                   ))}

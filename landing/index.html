@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRH — نظام إدارة الموارد البشرية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        var currencyRates = { 'DZD': 1, 'USD': 0.0074, 'USDT': 0.0074, 'SAR': 0.028, 'AED': 0.027, 'EGP': 0.36, 'TND': 0.023, 'MAD': 0.073, 'IQD': 9.6, 'JOD': 0.0052, 'KWD': 0.0023, 'BHD': 0.0028, 'OMR': 0.0029, 'QAR': 0.027, 'LBP': 660, 'SYP': 96, 'YER': 1.85, 'SDG': 4.5, 'LYD': 0.036, 'MRU': 0.29, 'DJF': 1.31, 'KMF': 3.36 };
+        var currencySymbols = { 'DZD': 'دج', 'USD': '$', 'USDT': 'USDT', 'SAR': 'ر.س', 'AED': 'د.إ', 'EGP': 'ج.م', 'TND': 'د.ت', 'MAD': 'د.م', 'IQD': 'د.ع', 'JOD': 'د.أ', 'KWD': 'د.ك', 'BHD': 'د.ب', 'OMR': 'ر.ع', 'QAR': 'ر.ق', 'LBP': 'ل.ل', 'SYP': 'ل.س', 'YER': '﷼', 'SDG': 'ج.س', 'LYD': 'د.ل', 'MRU': 'أ.م', 'DJF': 'ف.ج', 'KMF': 'ف.ج' };
+    </script>
+</head>
+<body>
+
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">DRH</span>
+                <span class="logo-text">نظام الموارد البشرية</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#problem">المشكلة</a></li>
+                <li><a href="#features">المزايا</a></li>
+                <li><a href="#pricing">التسعير</a></li>
+                <li><a href="#contact">التواصل</a></li>
+            </ul>
+            <a href="#contact" class="btn btn-nav">جرّب مجاناً</a>
+            <button class="hamburger" id="hamburger" aria-label="القائمة">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="container hero-content">
+            <div class="hero-badge">للعالم العربي — 22 دولة</div>
+            <h1>نظام <span class="gradient-text">إدارة الموارد البشرية</span> للشركات العربية</h1>
+            <p class="hero-sub">برنامج موارد بشرية سطح مكتب ثنائي اللغة عربي/فرنسي، يدعم القوانين العمل في جميع الدول العربية. ادفع بال dinar أو دولار أو USDT</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary btn-lg">ابدأ مجاناً لمدة 30 يوم</a>
+                <a href="#features" class="btn btn-outline btn-lg">اكتشف المزايا</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">+50</span>
+                    <span class="stat-label">وحدة وظيفية</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">FR/AR</span>
+                    <span class="stat-label">ثنائية اللغة</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">Offline</span>
+                    <span class="stat-label">يعمل بدون إنترنت</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">$19</span>
+                    <span class="stat-label">يبدأ من</span>
+                </div>
+            </div>
+            <div class="country-selector">
+                <span>اختر بلدك:</span>
+                <select id="countrySelect" onchange="changeCountry(this.value)">
+                    <option value="DZ">الجزائر — DZD</option>
+                    <option value="TN">تونس — TND</option>
+                    <option value="MA">المغرب — MAD</option>
+                    <option value="LY">ليبيا — LYD</option>
+                    <option value="EG">مصر — EGP</option>
+                    <option value="IQ">العراق — IQD</option>
+                    <option value="JO">الأردن — JOD</option>
+                    <option value="LB">لبنان — LBP</option>
+                    <option value="SY">سوريا — SYP</option>
+                    <option value="PS">فلسطين — ILS</option>
+                    <option value="SA">السعودية — SAR</option>
+                    <option value="AE">الإمارات — AED</option>
+                    <option value="QA">قطر — QAR</option>
+                    <option value="KW">الكويت — KWD</option>
+                    <option value="BH">البحرين — BHD</option>
+                    <option value="OM">عُمان — OMR</option>
+                    <option value="YE">اليمن — YER</option>
+                    <option value="SD">السودان — SDG</option>
+                    <option value="MR">موريتانيا — MRU</option>
+                    <option value="DJ">جيبوتي — DJF</option>
+                    <option value="KM">جزر القمر — KMF</option>
+                </select>
+            </div>
+        </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 120" fill="none"><path d="M0 60L48 52C96 44 192 28 288 24C384 20 480 28 576 40C672 52 768 68 864 72C960 76 1056 68 1152 56C1248 44 1344 28 1392 20L1440 12V120H0V60Z" fill="var(--bg)"/></svg>
+        </div>
+    </section>
+
+    <section class="problem" id="problem">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">المشكلة</span>
+                <h2>لماذا تحتاج إلى DRH؟</h2>
+                <p>معظم الشركات العربية لا تزال تدير موارد البشرية بالطرق القديمة</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">excel</div>
+                    <h3>إدارة الملفات على Excel</h3>
+                    <p>أخطاء حسابية متكررة، لا يوجد تاريخ، صعوبة في البحث، خطر فقدان البيانات</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">paper</div>
+                    <h3>الأوراق والملفات الورقية</h3>
+                    <p>ضياع المستندات، بطء في الإعداد، صعوبة في الأرشفة، لا يوجد نسخ احتياطي</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">calc</div>
+                    <h3>حساب الرواتب يدوياً</h3>
+                    <p>错误 في CNAS و IRG، تأخير في الكشوف، عدم الامتثال للقوانين الجزائرية</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">time</div>
+                    <h3>ضياع الوقت</h3>
+                    <p>ساعات طويلة لإعداد كشوف الرواتب، التصريحات الاجتماعية، متابعة الإجازات</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="solution" id="solution">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge accent">الحل</span>
+                <h2>DRH يحل كل مشاكلك</h2>
+                <p>برنامج واحد يجمع كل احتياجات الموارد البشرية في أي دولة عربية</p>
+            </div>
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <div class="solution-num">01</div>
+                    <h3>ملفات الموظفين</h3>
+                    <p>كل معلومات الموظف في مكان واحد: البطاقة التعريفية، العقد، الراتب، الإجازات، المستندات</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-num">02</div>
+                    <h3>كشوف الرواتب</h3>
+                    <p>حساب تلقائي CNAS 9% + IRG حسب القانون الجزائري، كشوف PDF جاهزة للطباعة</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-num">03</div>
+                    <h3>إدارة الإجازات</h3>
+                    <p>طلب إجازة → موافقة المدير → تحديث تلقائي. حساب التواقيف حسب القانون 90-11</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-num">04</div>
+                    <h3>العقود الثنائية اللغة</h3>
+                    <p>إنشاء عقود CDI/CDD بالفرنسية والعربية تلقائياً مع بيانات الموظف</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-num">05</div>
+                    <h3>لوحة معلومات ذكية</h3>
+                    <p>إحصائيات مباشرة: عدد الموظفين، الإجازات، الرواتب، الأقسام، المؤشرات</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-num">06</div>
+                    <h3>مساعد بالذكاء الاصطناعي</h3>
+                    <p>مساعد ذكي يجيب على أسئلتك في الموارد البشرية، القوانين، الإجراءات</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">المزايا</span>
+                <h2>لماذا DRH أفضل من المنافسين؟</h2>
+                <p>مقارنة شاملة مع البرامج الموجودة في السوق العربي والدولي</p>
+            </div>
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th class="highlight">DRH</th>
+                            <th>Zoho People</th>
+                            <th>Sage HR</th>
+                            <th>BambooHR</th>
+                            <th>OrangeHRM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ثنائية اللغة عربي/فرنسي</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="partial">Partial</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="partial">Partial</td>
+                        </tr>
+                        <tr>
+                            <td>يعمل بدون إنترنت</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                        </tr>
+                        <tr>
+                            <td>واجهة عصرية وسهلة</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="partial">Partial</td>
+                        </tr>
+                        <tr>
+                            <td>تصدير Word/PDF</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="check">Yes</td>
+                        </tr>
+                        <tr>
+                            <td>ذكاء اصطناعي مدمج</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="check">Yes</td>
+                            <td class="cross">No</td>
+                            <td class="check">Yes</td>
+                            <td class="cross">No</td>
+                        </tr>
+                        <tr>
+                            <td>لا اشتراك شهري</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="partial">Open Source</td>
+                        </tr>
+                        <tr>
+                            <td>سعر مناسب للعالم العربي</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="check">Yes</td>
+                        </tr>
+                        <tr>
+                            <td>الدفع بالعملة المحلية / USDT</td>
+                            <td class="highlight check">Yes</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                            <td class="cross">No</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="features-highlight">
+                <div class="feature-highlight-card">
+                    <div class="fh-icon">bilingual</div>
+                    <h3>ثنائية اللغة بالكامل</h3>
+                    <p>واجهة عربية مع RTL أصلي + واجهة فرنسية. جميع الوثائق: عقود، كشوف رواتب، شهادات باللغتين</p>
+                </div>
+                <div class="feature-highlight-card">
+                    <div class="fh-icon">desktop</div>
+                    <h3>سطح مكتب — لا إنترنت مطلوب</h3>
+                    <p>يعمل على جهازك مباشرة بدون خادم. بياناتك تبقى آمنة عندك. لا اشتراك شهري، لا إنترنت مطلوب</p>
+                </div>
+                <div class="feature-highlight-card">
+                    <div class="fh-icon">ai</div>
+                    <h3>مساعد بالذكاء الاصطناعي</h3>
+                    <p>اسأل أي سؤال في الموارد البشرية والقوانين الجزائرية. المساعد يجيبك فوراً</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">التسعير</span>
+                <h2>سعر واحد — بدون مفاجآت</h2>
+                <p>لا اشتراك شهري، لا صيانة إجبارية. ادفع مرة واحدة واستخدم إلى الأبد</p>
+            </div>
+            <div class="currency-bar">
+                <span>العملة:</span>
+                <button class="curr-btn active" onclick="setCurrency('DZD')">🇩🇿 DZD دج</button>
+                <button class="curr-btn" onclick="setCurrency('USD')">🇺🇸 USD $</button>
+                <button class="curr-btn" onclick="setCurrency('USDT')">💎 USDT</button>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>DRH Start</h3>
+                        <div class="price" data-dzd="25000">25,000 <span class="curr-symbol">دج</span></div>
+                        <p class="pricing-period">سعر واحد — بدون اشتراك</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li class="included">10 موظفين كحد أقصى</li>
+                        <li class="included">ملفات الموظفين</li>
+                        <li class="included">كشوف الرواتب</li>
+                        <li class="included">إدارة الإجازات</li>
+                        <li class="included">سنة تحديث مجانية</li>
+                        <li class="excluded">تصدير Word</li>
+                        <li class="excluded">مساعد الذكاء الاصطناعي</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline btn-block">ابدأ الآن</a>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">الأكثر طلباً</div>
+                    <div class="pricing-header">
+                        <h3>DRH PME</h3>
+                        <div class="price" data-dzd="75000">75,000 <span class="curr-symbol">دج</span></div>
+                        <p class="pricing-period">سعر واحد — بدون اشتراك</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li class="included">50 موظف كحد أقصى</li>
+                        <li class="included">كل مزايا Start</li>
+                        <li class="included">العقود الثنائية اللغة</li>
+                        <li class="included">تصدير Word/PDF</li>
+                        <li class="included">مساعد الذكاء الاصطناعي</li>
+                        <li class="included">لوحة معلومات ذكية</li>
+                        <li class="included">دعم فني</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-primary btn-block">ابدأ الآن</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>DRH Pro</h3>
+                        <div class="price" data-dzd="150000">150,000 <span class="curr-symbol">دج</span></div>
+                        <p class="pricing-period">سعر واحد — بدون اشتراك</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li class="included">200 موظف كحد أقصى</li>
+                        <li class="included">كل مزايا PME</li>
+                        <li class="included">متعدد المواقع</li>
+                        <li class="included">أرشيف إلكتروني GED</li>
+                        <li class="included">دعم أولوي 24/7</li>
+                        <li class="included">تدريب في الموقع</li>
+                        <li class="included">تحديثات مجانية مدى الحياة</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline btn-block">تواصل معنا</a>
+                </div>
+            </div>
+            <div class="pricing-note">
+                <p>للمزيد من 200 موظف — <a href="#contact">تواصل معنا</a> لعرض سعر مخصص مع تركيب وتدريب</p>
+            </div>
+            <div class="pricing-comparison">
+                <h3>قارن مع المنافسين</h3>
+                <div class="compare-cards">
+                    <div class="compare-card">
+                        <h4>Ratib (الجزائر)</h4>
+                        <p>40,000 دج/سنة × 3 سنوات = 120,000 دج</p>
+                        <span class="compare-result">DRH PME أرخص بـ 37%</span>
+                    </div>
+                    <div class="compare-card">
+                        <h4>Sage (دولي)</h4>
+                        <p>500$–2000$ / سنة اشتراك</p>
+                        <span class="compare-result">DRH Pro أرخص بـ 90%</span>
+                    </div>
+                    <div class="compare-card">
+                        <h4>Zoho People</h4>
+                        <p>$6/موظف/شهر = $3600/سنة لـ 50 موظف</p>
+                        <span class="compare-result">DRH PME أرخص بـ 98%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-section" id="payment">
+                <h3>طرق الدفع المقبولة</h3>
+                <div class="payment-grid">
+                    <div class="payment-card">
+                        <div class="payment-icon">DZD</div>
+                        <h4>الجزائر — بريدي موب</h4>
+                        <p class="payment-detail">CCP: <strong>007999999001096716738</strong></p>
+                        <p class="payment-note">ارسل المبلغ + اسمك عبر بريدي موب</p>
+                    </div>
+                    <div class="payment-card">
+                        <div class="payment-icon crypto">USDT</div>
+                        <h4>الدول العربية — USDT TRC20</h4>
+                        <p class="payment-detail">TRC20: <code>TRG5pAgqzjmtLc5C5t3CuixjR2uDYyjTLR</code></p>
+                        <p class="payment-note">التحويل عبر شبكة TRON</p>
+                    </div>
+                    <div class="payment-card">
+                        <div class="payment-icon crypto">USDT</div>
+                        <h4>الدول العربية — USDT BEP20</h4>
+                        <p class="payment-detail">BEP20: <code>0xd475ec76afe69333422c2623b81640c974c5fcb8</code></p>
+                        <p class="payment-note">التحويل عبر شبكة BSC</p>
+                    </div>
+                </div>
+                <p class="payment-instructions">بعد التحويل، أرسل إثبات الدفع (screenshot) على البريد: <a href="mailto:toumi.bentamra@gmail.com">toumi.bentamra@gmail.com</a> مع اسمك واسم الشركة</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">شهادات</span>
+                <h2>ماذا يقول عملاؤنا</h2>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"قبل DRH كنا نستخدم Excel وكان ياخذ علينا يوم كامل في كشوف الرواتب. الآن في 30 دقيقة خلصنا!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">M</div>
+                        <div>
+                            <strong>م. بن عمر</strong>
+                            <span>مدير الموارد البشرية — شركة بناء</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"الميزة الأفضل هي ثنائية اللغة. عندنا موظفون يفضلون العربية وآخرون يفضلون الفرنسية. DRH يخدم الطرفين."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">S</div>
+                        <div>
+                            <strong>س. بوزيد</strong>
+                            <span>مديرة شركة — قطاع الخدمات</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"يعمل بدون إنترنت وهذا ممتاز لأن عندي فروع في ولايات مختلفة. كل واحد يعمل على جهازه."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">K</div>
+                        <div>
+                            <strong>ك. مرابط</strong>
+                            <span>المدير العام — مجموعة شركات نقل</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="contact">
+        <div class="container">
+            <div class="cta-content">
+                <h2>ابدأ اليوم مجاناً</h2>
+                <p>تجربة مجانية لمدة 30 يوم بدون بطاقة بنكية. بدون التزام.</p>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" placeholder="محمد بن عمر" required>
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" placeholder="contact@entreprise.dz" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" placeholder="+213 555 00 00 00">
+                        </div>
+                        <div class="form-group">
+                            <label>اسم الشركة</label>
+                            <input type="text" placeholder="الشركة الجزائرية للبناء" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الدولة</label>
+                            <select id="formCountry">
+                                <option value="DZ">الجزائر</option>
+                                <option value="TN">تونس</option>
+                                <option value="MA">المغرب</option>
+                                <option value="LY">ليبيا</option>
+                                <option value="EG">مصر</option>
+                                <option value="IQ">العراق</option>
+                                <option value="JO">الأردن</option>
+                                <option value="LB">لبنان</option>
+                                <option value="SY">سوريا</option>
+                                <option value="PS">فلسطين</option>
+                                <option value="SA">السعودية</option>
+                                <option value="AE">الإمارات</option>
+                                <option value="QA">قطر</option>
+                                <option value="KW">الكويت</option>
+                                <option value="BH">البحرين</option>
+                                <option value="OM">عُمان</option>
+                                <option value="YE">اليمن</option>
+                                <option value="SD">السودان</option>
+                                <option value="MR">موريتانيا</option>
+                                <option value="DJ">جيبوتي</option>
+                                <option value="KM">جزر القمر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>عدد الموظفين</label>
+                            <select>
+                                <option>1 - 10 موظفين</option>
+                                <option>11 - 50 موظف</option>
+                                <option>51 - 200 موظف</option>
+                                <option>أكثر من 200 موظف</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>طريقة الدفع المفضلة</label>
+                            <select>
+                                <option>بريدي موب (الجزائر)</option>
+                                <option>USDT TRC20</option>
+                                <option>USDT BEP20</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الرسالة</label>
+                            <textarea placeholder="أخبرنا عن احتياجاتك..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">أرسل الطلب — جرّب مجاناً</button>
+                </form>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="ci-icon">email</span>
+                        <a href="mailto:toumi.bentamra@gmail.com">toumi.bentamra@gmail.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <span class="ci-icon">phone</span>
+                        <span>واتساب: تواصل عبر البريد الإلكتروني</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">DRH</span>
+                    <p>نظام إدارة الموارد البشرية للشركات العربية — الجزائر، تونس، المغرب، مصر، العراق، السعودية، الإمارات + 15 دولة أخرى</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">الرئيسية</a>
+                    <a href="#features">المزايا</a>
+                    <a href="#pricing">التسعير</a>
+                    <a href="#contact">التواصل</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>2026 DRH — جميع الحقوق محفوظة — صنع في الجزائر 🇩🇿 — متاح في 22 دولة عربية</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

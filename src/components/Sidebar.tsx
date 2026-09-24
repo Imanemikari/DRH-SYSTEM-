@@ -1,10 +1,11 @@
 import {
   LayoutDashboard, Users, Building2, Calendar, CalendarOff,
-  Wallet, Settings, ChevronLeft, ChevronRight, Sparkles, FileText
+  Settings, ChevronLeft, ChevronRight, Sparkles, FileText, FileWarning, RefreshCcw, ClipboardCheck, Timer, FolderOpen, BarChart3
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
 
-type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'payroll' | 'settings' | 'avendant';
+type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'reports';
 
 interface SidebarProps {
   currentPage: Page;
@@ -16,15 +17,22 @@ interface SidebarProps {
 
 export default function Sidebar({ currentPage, navigateTo, collapsed, onToggle, onAI }: SidebarProps) {
   const { t, dir } = useLang();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const menuItems: { id: Page; labelKey: string; icon: any }[] = [
+    { id: 'reports', labelKey: 'navReports', icon: BarChart3 },
     { id: 'dashboard', labelKey: 'navDashboard', icon: LayoutDashboard },
     { id: 'employees', labelKey: 'navEmployees', icon: Users },
     { id: 'departments', labelKey: 'navDepartments', icon: Building2 },
     { id: 'attendance', labelKey: 'navAttendance', icon: Calendar },
+    { id: 'pointage', labelKey: 'navPointage', icon: ClipboardCheck },
+    { id: 'heures-supp', labelKey: 'navHeuresSupp', icon: Timer },
     { id: 'leaves', labelKey: 'navLeaves', icon: CalendarOff },
+    { id: 'contracts', labelKey: 'navContracts', icon: FileWarning },
+    { id: 'rotation', labelKey: 'navDeplacement', icon: RefreshCcw },
     { id: 'avendant', labelKey: 'navAvendant', icon: FileText },
-    { id: 'payroll', labelKey: 'navPayroll', icon: Wallet },
+    { id: 'documents', labelKey: 'navDocuments', icon: FolderOpen },
     { id: 'settings', labelKey: 'navSettings', icon: Settings },
   ];
 
@@ -32,22 +40,21 @@ export default function Sidebar({ currentPage, navigateTo, collapsed, onToggle, 
     <aside
       className={`${
         collapsed ? 'w-[72px]' : 'w-64'
-      } h-full bg-white/90 backdrop-blur-lg border-l border-white/30 flex flex-col transition-all duration-300 ease-in-out no-print`}
-      style={{ borderRight: dir === 'rtl' ? 'none' : undefined, borderLeft: dir === 'ltr' ? '1px solid #e2e8f0' : undefined }}
+      } h-full flex flex-col transition-all duration-300 ease-in-out no-print sidebar-bank ${isDark ? 'border-r border-slate-700/50' : 'border-r border-white/10'}`}
     >
-      <div className="h-16 flex items-center justify-center border-b border-surface-100 px-4">
+      <div className={`h-16 flex items-center justify-center border-b px-4 ${isDark ? 'border-slate-700/50' : 'border-white/10'}`}>
         {!collapsed ? (
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary-500/20">
+            <div className="w-9 h-9 rounded-xl bank-gold-bg gold-glow gold-sheen flex items-center justify-center shadow-lg shadow-amber-500/20">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-surface-800">{t('appShort')}</h1>
-              <p className="text-[10px] text-surface-400 leading-tight">{t('appDesc')}</p>
+              <h1 className="text-sm font-bold text-white">{t('appShort')}</h1>
+              <p className="text-[10px] leading-tight text-white/50">{t('appDesc')}</p>
             </div>
           </div>
         ) : (
-          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary-500/20">
+          <div className="w-9 h-9 rounded-xl bank-gold-bg gold-glow gold-sheen flex items-center justify-center shadow-lg shadow-amber-500/20">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
         )}
@@ -61,10 +68,16 @@ export default function Sidebar({ currentPage, navigateTo, collapsed, onToggle, 
             <button
               key={item.id}
               onClick={() => navigateTo(item.id)}
-              className={`sidebar-link w-full ${isActive ? 'active' : ''} ${collapsed ? 'justify-center px-0' : ''}`}
+              className={`w-full rounded-xl transition-all duration-200 flex items-center gap-3 text-sm font-medium ${
+                collapsed ? 'justify-center px-0 py-2.5' : 'px-4 py-2.5'
+              } ${
+                isActive
+                  ? 'bg-gradient-to-l from-amber-400 via-amber-400 to-yellow-500 text-white shadow-lg shadow-amber-400/40 gold-sheen'
+                  : 'text-white/60 hover:text-white hover:bg-white/10'
+              }`}
               title={collapsed ? t(item.labelKey) : undefined}
             >
-              <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]' : 'icon-glow'}`} />
+              <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-white/50'}`} />
               {!collapsed && <span>{t(item.labelKey)}</span>}
             </button>
           );
@@ -87,10 +100,10 @@ export default function Sidebar({ currentPage, navigateTo, collapsed, onToggle, 
         </button>
       </div>
 
-      <div className="border-t border-surface-100 p-3">
+      <div className={`border-t p-3 ${isDark ? 'border-slate-700/50' : 'border-white/10'}`}>
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-surface-400 hover:text-surface-600 hover:bg-surface-50 rounded-xl transition-all"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl transition-all text-white/50 hover:text-white hover:bg-white/10"
         >
           {dir === 'rtl' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           {!collapsed && <span className="text-xs">{t('navCollapse')}</span>}

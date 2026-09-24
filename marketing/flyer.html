@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRH — نظام إدارة الموارد البشرية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#fff;min-height:100vh;padding:20px}
+.flyer{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.05);border-radius:24px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;backdrop-filter:blur(20px)}
+.header{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);padding:40px 30px;text-align:center}
+.header h1{font-size:48px;font-weight:900;margin-bottom:10px;text-shadow:0 2px 10px rgba(0,0,0,0.3)}
+.header p{font-size:18px;opacity:0.9}
+.badge{display:inline-block;background:rgba(255,255,255,0.2);padding:6px 16px;border-radius:20px;font-size:14px;margin-top:10px}
+.features{padding:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature{background:rgba(255,255,255,0.08);border-radius:16px;padding:20px;text-align:center;border:1px solid rgba(255,255,255,0.1);transition:transform 0.3s}
+.feature:hover{transform:translateY(-4px)}
+.feature .icon{font-size:36px;margin-bottom:10px}
+.feature h3{font-size:16px;margin-bottom:6px;color:#60a5fa}
+.feature p{font-size:13px;opacity:0.7}
+.pricing{padding:30px;background:rgba(255,255,255,0.03)}
+.pricing h2{text-align:center;font-size:28px;margin-bottom:20px;color:#fbbf24}
+.price-cards{display:flex;gap:16px;justify-content:center}
+.price-card{background:rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-align:center;flex:1;max-width:220px;border:2px solid rgba(255,255,255,0.1)}
+.price-card.featured{border-color:#fbbf24;background:rgba(251,191,36,0.1)}
+.price-card h3{font-size:18px;color:#60a5fa;margin-bottom:8px}
+.price-card .price{font-size:32px;font-weight:900;color:#fbbf24}
+.price-card .period{font-size:13px;opacity:0.6;margin-top:4px}
+.price-card .desc{font-size:13px;margin-top:8px;opacity:0.8}
+.cta{padding:30px;text-align:center;background:linear-gradient(135deg,#3b82f6,#8b5cf6)}
+.cta h2{font-size:24px;margin-bottom:16px}
+.contact-info{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.contact-item{background:rgba(255,255,255,0.15);padding:10px 20px;border-radius:12px;font-size:14px}
+.footer{padding:16px;text-align:center;font-size:12px;opacity:0.5}
+.payment{padding:20px 30px;text-align:center}
+.payment h3{margin-bottom:10px;color:#34d399}
+.payment-methods{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.payment-method{background:rgba(255,255,255,0.08);padding:8px 16px;border-radius:8px;font-size:13px}
+.countries{padding:16px 30px;text-align:center;background:rgba(255,255,255,0.03)}
+.countries h3{margin-bottom:8px;font-size:14px;color:#a78bfa}
+.countries p{font-size:12px;opacity:0.6}
+@media print{body{background:#fff;padding:0}.flyer{border:none;background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div class="flyer">
+<div class="header">
+<h1>DRH</h1>
+<p>نظام إدارة الموارد البشرية للشركات العربية</p>
+<div class="badge"> tworバージョン 1.0 — يعمل بدون إنترنت</div>
+</div>
+<div class="features">
+<div class="feature">
+<div class="icon">🌐</div>
+<h3>ثنائية اللغة</h3>
+<p>عربي/فرنسي بالكامل مع دعم RTL</p>
+</div>
+<div class="feature">
+<div class="icon">🔐</div>
+<h3>يعمل بدون إنترنت</h3>
+<p>بياناتك آمنة على جهازك</p>
+</div>
+<div class="feature">
+<div class="icon">💰</div>
+<h3>حساب تلقائي</h3>
+<p>CNAS + IRG بدقة 100%</p>
+</div>
+<div class="feature">
+<div class="icon">📄</div>
+<h3>عقود ثنائية اللغة</h3>
+<p>CDI/CDD/Stage بنقرة واحدة</p>
+</div>
+<div class="feature">
+<div class="icon">📊</div>
+<h3>لوحة معلومات</h3>
+<p>متابعة فورية لجميع المؤشرات</p>
+</div>
+<div class="feature">
+<div class="icon">🤖</div>
+<h3>مساعد ذكاء اصطناعي</h3>
+<p>إجابات فورية على أسئلتك</p>
+</div>
+</div>
+<div class="pricing">
+<h2>💰 الأسعار — سعر واحد للأبد!</h2>
+<div class="price-cards">
+<div class="price-card">
+<h3>Start</h3>
+<div class="price">25,000 دج</div>
+<div class="period">1-10 موظفين</div>
+<div class="desc">للشركات الناشئة</div>
+</div>
+<div class="price-card featured">
+<h3>PME ⭐</h3>
+<div class="price">75,000 دج</div>
+<div class="period">11-50 موظف</div>
+<div class="desc">الأكثر طلباً</div>
+</div>
+<div class="price-card">
+<h3>Pro</h3>
+<div class="price">150,000 دج</div>
+<div class="period">51-200 موظف</div>
+<div class="desc">للشركات الكبيرة</div>
+</div>
+</div>
+</div>
+<div class="payment">
+<h3>💳 طرق الدفع</h3>
+<div class="payment-methods">
+<div class="payment-method">📱 بريدي موب CCP: 007999999001096716738</div>
+<div class="payment-method">💰 USDT TRC20</div>
+<div class="payment-method">💰 USDT BEP20</div>
+</div>
+</div>
+<div class="cta">
+<h2>🚀 ابدأ الآن مجاناً لمدة 30 يوم!</h2>
+<div class="contact-info">
+<div class="contact-item">📧 toumi.bentamra@gmail.com</div>
+<div class="contact-item">🌍 22 دولة عربية</div>
+</div>
+</div>
+<div class="countries">
+<h3>🌍 متاح في 22 دولة عربية</h3>
+<p>الجزائر | تونس | المغرب | ليبيا | مصر | العراق | الأردن | لبنان | سوريا | فلسطين | السعودية | الإمارات | قطر | الكويت | البحرين | عمان | اليمن | السودان | موريتانيا | جيبوتي | جزر القمر</p>
+</div>
+<div class="footer">
+<p>© 2026 DRH — جميع الحقوق محفوظة</p>
+</div>
+</div>
+</body>
+</html>
