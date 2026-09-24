@@ -105,6 +105,7 @@ export const api = {
   markNotificationsRead: () => ipcRenderer?.invoke('db:mark-notifications-read'),
   addNotification: (type: string, message: string) => ipcRenderer?.invoke('db:add-notification', { type, message }),
   sendTelegram: (text: string) => ipcRenderer?.invoke('db:send-telegram', { text }),
+  queueAlert: (kind: string, payload: any) => ipcRenderer?.invoke('db:queue-alert', { kind, payload }),
 
   // Rotation DEPLACE
   getDeplacement: () => ipcRenderer?.invoke('db:get-deplacement') || [],

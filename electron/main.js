@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
+const net = require('net');
 const initSqlJs = require('sql.js/dist/sql-asm.js');
 const { generateLicenseKey, validateLicenseKey, saveLicense, loadLicense, isActivated, getMachineId } = require('./license');
 
@@ -297,6 +298,16 @@ async function initDatabase() {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS pending_alerts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // DEPLACE rotation tracking: 22 worked days => 8+ days rotation leave
   db.run(`
     CREATE TABLE IF NOT EXISTS deplacement_tracking (
@@ -472,6 +483,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   await initDatabase();
   createWindow();
+  flushAlertQueue();
 });
 
 app.on('window-all-closed', () => {
@@ -950,8 +962,65 @@ function sendTelegram(botToken, chatId, text) {
     } catch (e) { resolve({ success: false, error: String((e && e.message) || e) }); }
   });
 }
-ipcMain.handle('db:send-telegram', async (e, { text, to }) => {
+// ===== Offline alert outbox: failed alerts are stored and retried when back online =====
+let lastOnlineCheck = 0;
+let lastOnline = false;
+function isOnlineFast() {
+  const now = Date.now();
+  if (now - lastOnlineCheck < 30000) return Promise.resolve(lastOnline);
+  lastOnlineCheck = now;
+  return new Promise((resolve) => {
+    let done = false;
+    const fin = (v) => { if (!done) { done = true; lastOnline = v; resolve(v); } };
+    try {
+      const s = net.connect(53, '8.8.8.8');
+      s.on('connect', () => { try { s.destroy(); } catch (e) {} fin(true); });
+      s.on('error', () => fin(false));
+      setTimeout(() => fin(false), 4000);
+    } catch (e) { fin(false); }
+  });
+}
+async function flushAlertQueue() {
   try {
+    if (!db) return;
+    const rows = queryAll('SELECT * FROM pending_alerts ORDER BY id ASC LIMIT 20');
+    if (!rows.length) return;
+    if (!(await isOnlineFast())) return;
+    const { sendEmail } = require('./email');
+    for (const r of rows) {
+      let ok = false;
+      try {
+        const p = JSON.parse(r.payload || '{}');
+        if (r.kind === 'telegram') {
+          const srows = queryAll("SELECT key, value FROM settings WHERE key IN ('telegram_bot_token','telegram_chat_id')");
+          const m = {};
+          srows.forEach((x) => { m[x.key] = x.value; });
+          const t = await sendTelegram(m.telegram_bot_token || '', p.to || m.telegram_chat_id || '', p.text || '');
+          ok = !!(t && t.success);
+        } else if (r.kind === 'email') {
+          const srows = queryAll("SELECT key, value FROM settings WHERE key LIKE 'smtp%'");
+          const m = {};
+          srows.forEach((x) => { m[x.key] = x.value; });
+          if (m.smtp_user && m.smtp_pass) {
+            const t = await sendEmail({ host: m.smtp_host || 'smtp-relay.brevo.com', port: parseInt(m.smtp_port || 587, 10), secure: m.smtp_secure === '1', user: m.smtp_user, pass: m.smtp_pass, to: p.to, from: m.smtp_from || m.smtp_user, subject: p.subject || 'DRH Alert', html: p.html || '', files: [] });
+            ok = !!(t && t.success);
+          }
+        } else { ok = true; }
+      } catch (e) {}
+      if (ok) runSql('DELETE FROM pending_alerts WHERE id = ?', [r.id]);
+      else runSql('UPDATE pending_alerts SET attempts = attempts + 1 WHERE id = ?', [r.id]);
+    }
+    runSql('DELETE FROM pending_alerts WHERE attempts >= 720');
+  } catch (e) {}
+}
+ipcMain.handle('db:queue-alert', (e, { kind, payload }) => {
+  runSql('INSERT INTO pending_alerts (kind, payload) VALUES (?, ?)', [kind || '', JSON.stringify(payload || {})]);
+  flushAlertQueue();
+  return { success: true };
+});
+setInterval(flushAlertQueue, 60000);
+
+ipcMain.handle('db:send-telegram', async (e, { text, to }) => {  try {
     const rows = queryAll("SELECT key, value FROM settings WHERE key IN ('telegram_bot_token','telegram_chat_id')");
     const map = {};
     rows.forEach((r) => { map[r.key] = r.value; });

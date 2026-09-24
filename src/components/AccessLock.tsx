@@ -66,28 +66,34 @@ export default function AccessLock({ onUnlock }: { onUnlock: () => void }) {
     try {
       await api.addNotification('security', "Tentative d'intrusion : 3 codes errones (" + dt + ')');
     } catch { /* noop */ }
+    const tgText = "DRH System - Tentative d'intrusion : 3 codes errones (" + dt + ')';
     try {
-      await api.sendTelegram("DRH System - Tentative d'intrusion : 3 codes errones (" + dt + ')');
-    } catch { /* noop */ }
+      const tg: any = await api.sendTelegram(tgText);
+      if (!(tg && tg.success)) { try { await api.queueAlert('telegram', { text: tgText }); } catch { /* noop */ } }
+    } catch {
+      try { await api.queueAlert('telegram', { text: tgText }); } catch { /* noop */ }
+    }
     try {
       const smtp: any = await api.getSmtpSettings();
       if (!smtp || !smtp.user || !smtp.pass) return;
-      await api.sendReportEmail({
+      const mailHtml = '<html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;color:#111" dir="ltr">'
+        + '<h2 style="color:#b91c1c">DRH System - intrusion attempt</h2>'
+        + '<p>Someone failed the access code 3 times.</p>'
+        + '<p><b>Date:</b> ' + dt + '</p>'
+        + '<p><b>Program:</b> DRH-System</p>'
+        + '</body></html>';
+      const em: any = await api.sendReportEmail({
         smtp,
         to: OWNER_EMAIL,
         from: smtp.from || smtp.user,
-        subject: 'DRH - Tentative d\'intrusion detectee',
+        subject: "DRH - Tentative d'intrusion detectee",
         format: 'pdf',
         prefix: 'SECURITE_',
-        html: '<html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;padding:24px;color:#111" dir="ltr">'
-          + '<h2 style="color:#b91c1c">DRH System — intrusion attempt</h2>'
-          + '<p>Someone failed the access code 3 times.</p>'
-          + '<p><b>Date:</b> ' + dt + '</p>'
-          + '<p><b>Program:</b> DRH-System</p>'
-          + '</body></html>',
+        html: mailHtml,
         sheets: [],
         landscape: false,
       });
+      if (!(em && em.success)) { try { await api.queueAlert('email', { to: OWNER_EMAIL, subject: "DRH - Tentative d'intrusion", html: mailHtml }); } catch { /* noop */ } }
     } catch { /* silent: alert is best-effort */ }
   };
 
