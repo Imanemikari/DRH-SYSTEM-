@@ -25,6 +25,7 @@ export default function Settings({ navigateTo }: SettingsProps) {
   const [tgOk, setTgOk] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [backupMsg, setBackupMsg] = useState('');
+  const [auditRows, setAuditRows] = useState<any[]>([]);
   const [aiProvider, setAiProvider] = useState('pollinations');
   const [aiModel, setAiModel] = useState('');
 
@@ -246,7 +247,8 @@ export default function Settings({ navigateTo }: SettingsProps) {
             const r: any = await api.backupNow();
             if (r && r.success) {
               setBackupMsg((lang === 'ar' ? 'تم إنشاء نسخة: ' : 'Sauvegarde créée : ') + r.name);
-              try { setBackups(await api.listBackups()); } catch { /* noop */ }
+try { setBackups(await api.listBackups()); } catch { /* noop */ }
+    try { setAuditRows(await api.getAuditLog()); } catch { /* noop */ }
             }
           }} className="btn-primary"><DatabaseBackup className="w-4 h-4" /> {lang === 'ar' ? 'نسخ الآن' : 'Sauvegarder'}</button>
         </div>
@@ -263,6 +265,27 @@ export default function Settings({ navigateTo }: SettingsProps) {
                   if (!window.confirm(b.name + '\n' + (lang === 'ar' ? 'استعادة هذه النسخة؟ سيُعاد تشغيل البرنامج.' : 'Restaurer cette sauvegarde ? Le programme va redémarrer.'))) return;
                   await api.restoreBackup(b.name);
                 }} className="text-[11px] font-bold text-[#14305a] dark:!text-amber-300 hover:underline shrink-0">{lang === 'ar' ? 'استعادة' : 'Restaurer'}</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center"><History className="w-4 h-4 text-white" /></div>
+          <h2 className="text-base font-semibold text-surface-800 dark:!text-slate-100">{lang === 'ar' ? 'سجل التدقيق' : "Journal d'audit"}</h2>
+        </div>
+        <p className="text-xs text-surface-500 dark:!text-slate-400 mb-4">{lang === 'ar' ? 'آخر الإجراءات المنفذة في البرنامج (بدون كلمات المرور).' : 'Dernières actions effectuées (mots de passe masqués).'}</p>
+        {auditRows.length === 0 ? (
+          <p className="text-xs text-surface-400 dark:!text-slate-500 text-center py-4">—</p>
+        ) : (
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {auditRows.slice(0, 50).map((a: any) => (
+              <div key={a.id} className="flex items-start gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:!bg-slate-700/50 border border-slate-100 dark:!border-slate-600/50">
+                <span className="text-[10px] font-mono text-slate-400 shrink-0 mt-0.5" dir="ltr">{String(a.created_at || '').slice(0, 16).replace('T', ' ')}</span>
+                <span className="text-[11px] font-bold text-[#14305a] dark:!text-amber-300 shrink-0">{a.action}</span>
+                <span className="text-[11px] text-surface-500 dark:!text-slate-400 truncate" dir="ltr">{a.details || ''}</span>
               </div>
             ))}
           </div>

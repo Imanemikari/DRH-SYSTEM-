@@ -109,6 +109,7 @@ export const api = {
   backupNow: () => ipcRenderer?.invoke('db:backup-now'),
   listBackups: () => ipcRenderer?.invoke('db:list-backups') || [],
   restoreBackup: (name: string) => ipcRenderer?.invoke('db:restore-backup', { name }),
+  getAuditLog: () => ipcRenderer?.invoke('db:get-audit-log') || [],
 
   // Rotation DEPLACE
   getDeplacement: () => ipcRenderer?.invoke('db:get-deplacement') || [],

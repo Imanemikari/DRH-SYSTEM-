@@ -1,8 +1,9 @@
-﻿const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+﻿const { app, BrowserWindow, ipcMain, dialog, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
 const net = require('net');
+const crypto = require('crypto');
 const initSqlJs = require('sql.js/dist/sql-asm.js');
 const { generateLicenseKey, validateLicenseKey, saveLicense, loadLicense, isActivated, getMachineId } = require('./license');
 
@@ -25,12 +26,72 @@ const DEMO_BLOCKED = new Set([
 ]);
 const ALWAYS_BLOCKED = new Set(['license:generate']);
 const _ipcHandle = ipcMain.handle.bind(ipcMain);
+
+// ===== Secret encryption (OS keychain via safeStorage, AES fallback, transparent for settings) =====
+const SECRET_KEYS = new Set(['smtp_pass', 'ai_api_key', 'telegram_bot_token']);
+const FALLBACK_SECRET = 'DRH-2026-SETTINGS-VAULT';
+function fallbackSeal(s) {
+  const iv = crypto.randomBytes(16);
+  const key = crypto.createHash('sha256').update(FALLBACK_SECRET).digest();
+  const c = crypto.createCipheriv('aes-256-cbc', key, iv);
+  return 'enc1:' + iv.toString('hex') + ':' + c.update(s, 'utf8', 'hex') + c.final('hex');
+}
+function fallbackOpen(s) {
+  const parts = String(s).split(':');
+  if (parts.length !== 3) throw new Error('bad format');
+  const key = crypto.createHash('sha256').update(FALLBACK_SECRET).digest();
+  const d = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(parts[1], 'hex'));
+  return d.update(parts[2], 'hex', 'utf8') + d.final('utf8');
+}
+function sealValue(v) {
+  try {
+    if (v === undefined || v === null || v === '') return v;
+    const s = String(v);
+    if (s.startsWith('enc:') || s.startsWith('enc1:')) return s;
+    if (safeStorage && safeStorage.isEncryptionAvailable()) {
+      return 'enc:' + safeStorage.encryptString(s).toString('base64');
+    }
+    return fallbackSeal(s);
+  } catch (e) {
+    try { return fallbackSeal(String(v)); } catch (e2) { return v; }
+  }
+}
+function openValue(v) {
+  try {
+    if (typeof v === 'string' && v.startsWith('enc1:')) return fallbackOpen(v);
+    if (typeof v === 'string' && v.startsWith('enc:')) {
+      if (safeStorage && safeStorage.isEncryptionAvailable()) {
+        return safeStorage.decryptString(Buffer.from(v.slice(4), 'base64'));
+      }
+    }
+  } catch (e) {}
+  return v;
+}
+
+// ===== Audit log (who did what) — written from the IPC wrapper below =====
+function auditScrub(key, value) {
+  if (/pass|passwd|password|api[_-]?key|secret|token/i.test(String(key))) return '***';
+  return value;
+}
+function auditChannel(channel, args) {
+  try {
+    if (!db) return;
+    if (channel.startsWith('db:get-') || channel.startsWith('db:search-')) return;
+    if (channel === 'license:check' || channel === 'db:mark-notifications-read' || channel === 'ai:chat') return;
+    let details = '';
+    try { details = JSON.stringify(args || [], auditScrub).slice(0, 500); } catch (e) { details = ''; }
+    runSql('INSERT INTO audit_log (actor, action, details) VALUES (?, ?, ?)', ['local', channel, details]);
+  } catch (e) {}
+}
+
 ipcMain.handle = (channel, listener) => _ipcHandle(channel, async (event, ...args) => {
   try {
     if (ALWAYS_BLOCKED.has(channel)) return { success: false, error: 'NOT_ALLOWED' };
     if (DEMO_BLOCKED.has(channel) && !isActivated()) return { success: false, error: 'DEMO_MODE' };
   } catch (e) {}
-  return listener(event, ...args);
+  const out = await listener(event, ...args);
+  try { auditChannel(channel, args); } catch (e) {}
+  return out;
 });
 
 let mainWindow;
@@ -304,6 +365,16 @@ async function initDatabase() {
       kind TEXT NOT NULL,
       payload TEXT NOT NULL,
       attempts INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      actor TEXT DEFAULT 'local',
+      action TEXT NOT NULL,
+      details TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -1488,15 +1559,25 @@ ipcMain.handle('generate-avendant', async (e, data) => {
 ipcMain.handle('db:get-settings', () => {
   const rows = queryAll('SELECT * FROM settings');
   const obj = {};
-  rows.forEach(r => obj[r.key] = r.value);
+  rows.forEach(r => { obj[r.key] = SECRET_KEYS.has(r.key) ? openValue(r.value) : r.value; });
+  // migrate legacy plain-text secrets to encrypted form
+  try {
+    rows.forEach(r => {
+      if (SECRET_KEYS.has(r.key) && typeof r.value === 'string' && r.value !== '' && !r.value.startsWith('enc:') && !r.value.startsWith('enc1:')) {
+        runSql('UPDATE settings SET value = ? WHERE key = ?', [sealValue(r.value), r.key]);
+      }
+    });
+  } catch (e) {}
   return obj;
 });
 ipcMain.handle('db:update-settings', (e, settings) => {
   for (const [key, value] of Object.entries(settings)) {
-    runSql('INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)', [key, value]);
+    const v = SECRET_KEYS.has(key) ? sealValue(value) : value;
+    runSql('INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)', [key, v]);
   }
   return { success: true };
 });
+ipcMain.handle('db:get-audit-log', () => queryAll('SELECT id, created_at, actor, action, details FROM audit_log ORDER BY id DESC LIMIT 100'));
 
 // ===== AI AGENT: local tools the assistant can call to perform duties =====
 const AGENT_TOOLS = [
