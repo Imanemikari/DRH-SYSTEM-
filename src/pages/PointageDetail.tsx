@@ -30,6 +30,8 @@ const CODES = [
   { key: 'AA', cls: 'bg-cyan-500 text-white border-cyan-600' },
   { key: 'AI', cls: 'bg-slate-500 text-white border-slate-600' },
   { key: 'AT', cls: 'bg-orange-500 text-white border-orange-600' },
+  { key: 'SS', cls: 'bg-lime-600 text-white border-lime-700' },
+  { key: 'MAT', cls: 'bg-fuchsia-500 text-white border-fuchsia-600' },
 ] as const;
 
 const CODE_STYLE: Record<string, string> = {
@@ -42,14 +44,16 @@ const CODE_STYLE: Record<string, string> = {
   AA: 'bg-cyan-500 text-white border-cyan-600',
   AI: 'bg-slate-500 text-white border-slate-600',
   AT: 'bg-orange-500 text-white border-orange-600',
+  SS: 'bg-lime-600 text-white border-lime-700',
+  MAT: 'bg-fuchsia-500 text-white border-fuchsia-600',
 };
 
-const CODE_CYCLE: (string | null)[] = [null, 'P', 'CR', 'CA', 'JF', 'CM', 'CD', 'AA', 'AI', 'AT'];
+const CODE_CYCLE: (string | null)[] = [null, 'P', 'CR', 'CA', 'JF', 'CM', 'CD', 'AA', 'AI', 'AT', 'SS', 'MAT'];
 
 const DAY_SHORT = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
 const PRESENCE_CODES = ['P', 'CR', 'CD', 'JF'];
-const ABSENCE_CODES = ['AA', 'AI', 'CM', 'AT'];
+const ABSENCE_CODES = ['AA', 'AI', 'CM', 'AT', 'SS', 'MAT'];
 const INDEMNITY_CDD = { key: 'panier', label: 'PANIER' };
 const INDEMNITY_DEPLACE = { key: 'deplacement', label: 'DEPLACEMENT' };
 
@@ -232,7 +236,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
               <th rowSpan={2} className="border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-center text-[10.5px] whitespace-nowrap">{t('pdColName')}</th>
               <th rowSpan={2} className="border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-center text-[10.5px] whitespace-nowrap">{t('pdColFonction')}</th>
               <th colSpan={4} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[10.5px] tracking-wider font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15">{t('pdGroupPresences')}</th>
-              <th colSpan={4} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[10.5px] tracking-wider font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/15">{t('pdGroupAbsences')}</th>
+              <th colSpan={6} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[10.5px] tracking-wider font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/15">{t('pdGroupAbsences')}</th>
               <th colSpan={3} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[10.5px] tracking-wider font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15">{t('pdGroupHs')}</th>
               <th colSpan={3} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[10.5px] tracking-wider font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/15">{t('pdGroupIndemnites')}</th>
             </tr>
@@ -249,7 +253,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={18} className="border border-slate-300 dark:border-slate-600 px-3 py-10 text-center text-surface-400 text-sm">...</td></tr>
+              <tr><td colSpan={20} className="border border-slate-300 dark:border-slate-600 px-3 py-10 text-center text-surface-400 text-sm">...</td></tr>
             )}
             {!loading && emps.map((emp, idx) => {
               const cnt = countCodes(emp.id);
@@ -276,7 +280,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
               );
             })}
             {!loading && emps.length === 0 && (
-              <tr><td colSpan={18} className="border border-slate-300 dark:border-slate-600 px-3 py-10 text-center text-surface-400 text-sm">{emptyLabel}</td></tr>
+              <tr><td colSpan={20} className="border border-slate-300 dark:border-slate-600 px-3 py-10 text-center text-surface-400 text-sm">{emptyLabel}</td></tr>
             )}
           </tbody>
         </table>
@@ -309,7 +313,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
         const cells = [
           String(idx + 1), esc(emp.matricule) || '-', `${esc(emp.last_name)} ${esc(emp.first_name)}`, esc(emp.position) || '-',
           String(cnt.P || 0), String(cnt.CR || 0), String(cnt.CD || 0), String(cnt.JF || 0),
-          String(cnt.AA || 0), String(cnt.AI || 0), String(cnt.CM || 0), String(cnt.AT || 0),
+          String(cnt.AA || 0), String(cnt.AI || 0), String(cnt.CM || 0), String(cnt.AT || 0), String(cnt.SS || 0), String(cnt.MAT || 0),
           hs ? hs.h50 : 0, hs ? hs.h75 : 0, hs ? hs.h100 : 0,
           hasIfsp(emp.position) ? '25%' : '-', esc(emp.transport) || '-', indemnityVal,
         ];
@@ -321,9 +325,9 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
         `<th rowspan="2" style="font-size:8pt;background:#14305a;color:#fff;">MATRICULE</th>` +
         `<th rowspan="2" style="font-size:8pt;background:#14305a;color:#fff;">NOM ET PRENOM</th>` +
         `<th rowspan="2" style="font-size:8pt;background:#14305a;color:#fff;">FONCTION</th>` +
-        g('PRESENCES', 4) + g('ABSENCES', 4) + g('H/ SUPPLEMENTAIRE', 3) + g('INDEMNITES', 3);
+        g('PRESENCES', 4) + g('ABSENCES', 6) + g('H/ SUPPLEMENTAIRE', 3) + g('INDEMNITES', 3);
       const secondRow =
-        ['P', 'CR', 'CD', 'JF', 'AA', 'AI', 'CM', 'AT', 'H50%', 'H75%', 'H100%', 'IFSP', 'TRANSPORT', indemnityLabel]
+        ['P', 'CR', 'CD', 'JF', 'AA', 'AI', 'CM', 'AT', 'SS', 'MAT', 'H50%', 'H75%', 'H100%', 'IFSP', 'TRANSPORT', indemnityLabel]
           .map(h => `<th style="font-size:8pt;background:#14305a;color:#fff;">${esc(h)}</th>`).join('');
       return `<table><thead><tr>${firstRow}</tr><tr>${secondRow}</tr></thead><tbody>${rows}</tbody></table>`;
     };
@@ -351,7 +355,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
     const pushVersoSeal = (emps: PointageEmployee[]) => emps.forEach(emp => {
       const cnt = countCodes(emp.id);
       const hs = hsRecords[emp.id];
-      sealRows.push([String(emp.id), emp.last_name + ' ' + emp.first_name, emp.position || '', String(cnt.P || 0), String(cnt.CR || 0), String(cnt.CD || 0), String(cnt.JF || 0), String(cnt.AA || 0), String(cnt.AI || 0), String(cnt.CM || 0), String(cnt.AT || 0), String(hs ? hs.h50 : 0), String(hs ? hs.h75 : 0), String(hs ? hs.h100 : 0)]);
+      sealRows.push([String(emp.id), emp.last_name + ' ' + emp.first_name, emp.position || '', String(cnt.P || 0), String(cnt.CR || 0), String(cnt.CD || 0), String(cnt.JF || 0), String(cnt.AA || 0), String(cnt.AI || 0), String(cnt.CM || 0), String(cnt.AT || 0), String(cnt.SS || 0), String(cnt.MAT || 0), String(hs ? hs.h50 : 0), String(hs ? hs.h75 : 0), String(hs ? hs.h100 : 0)]);
     });
     if (has('rec-cdi')) pushRectoSeal(regEmployees);
     if (has('rec-dep') && deplaceEmployees.length) pushRectoSeal(deplaceEmployees);
@@ -408,34 +412,34 @@ ${sealFooterHtml(makeSeal({ title: pageTitle + ' ' + monthLabel, rows: sealRows 
       return { name: '', rows, widths: rectoWidths, merges: rectoMerges, borderZone: { r1: 3, r2: Math.min(23, rows.length), c1: 1, c2: Math.min(32, rectoWidths.length) } };
     };
 
-    const versoWidths = [W(0.71), W(1.85), W(3.86), W(5.4), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(5.5), W(5.5), W(5.5), W(1.16), W(1.46), W(2.25)];
+    const versoWidths = [W(0.71), W(1.85), W(3.86), W(5.4), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(0.71), W(5.5), W(5.5), W(5.5), W(1.16), W(1.46), W(2.25)];
     const versoMerges = [
-      { r: 1, c: 1, r2: 1, c2: 18 },
-      { r: 2, c: 1, r2: 2, c2: 18 },
+      { r: 1, c: 1, r2: 1, c2: 20 },
+      { r: 2, c: 1, r2: 2, c2: 20 },
       { r: 3, c: 1, r2: 4, c2: 1 },
       { r: 3, c: 2, r2: 4, c2: 2 },
       { r: 3, c: 3, r2: 4, c2: 3 },
       { r: 3, c: 4, r2: 4, c2: 4 },
       { r: 3, c: 5, r2: 3, c2: 8 },
-      { r: 3, c: 9, r2: 3, c2: 12 },
-      { r: 3, c: 13, r2: 3, c2: 15 },
-      { r: 3, c: 16, r2: 3, c2: 18 },
+      { r: 3, c: 9, r2: 3, c2: 14 },
+      { r: 3, c: 15, r2: 3, c2: 17 },
+      { r: 3, c: 18, r2: 3, c2: 20 },
     ];
 
     const versoSheet = (emps: PointageEmployee[], startIdx: number, indemnityLabel: string) => {
       const rows: any[][] = [
-        [st(companyName || 'DRH System', 4), ...nulls(17)],
-        [st('POINTAGE — VERSO — ' + monthLabel.toUpperCase(), 5), ...nulls(17)],
+[st(companyName || 'DRH System', 4), ...nulls(19)],
+        [st('POINTAGE — VERSO — ' + monthLabel.toUpperCase(), 5), ...nulls(19)],
         [st('N°', 1), st('MATRICULE', 1), st('NOM ET PRENOM', 1), st('FONCTION', 1),
-         st('PRESENCES', 1), null, null, null,
-         st('ABSENCES', 1), null, null, null,
-         st('H/ SUPPLEMENTAIRE', 1), null, null,
-         st('INDEMNITES', 1), null, null],
+          st('PRESENCES', 1), null, null, null,
+          st('ABSENCES', 1), null, null, null, null, null,
+          st('H/ SUPPLEMENTAIRE', 1), null, null,
+          st('INDEMNITES', 1), null, null],
         [null, null, null, null,
-         st('P', 1), st('CR', 1), st('CD', 1), st('JF', 1),
-         st('AA', 1), st('AI', 1), st('CM', 1), st('AT', 1),
-         st('H50%', 1), st('H75%', 1), st('H100%', 1),
-         st('IFSP', 1), st('TRANSPORT', 1), st(indemnityLabel, 1)],
+          st('P', 1), st('CR', 1), st('CD', 1), st('JF', 1),
+          st('AA', 1), st('AI', 1), st('CM', 1), st('AT', 1), st('SS', 1), st('MAT', 1),
+          st('H50%', 1), st('H75%', 1), st('H100%', 1),
+          st('IFSP', 1), st('TRANSPORT', 1), st(indemnityLabel, 1)],
         ...emps.map((emp, i) => {
           const cnt = countCodes(emp.id);
           const hs = hsRecords[emp.id];
@@ -443,7 +447,7 @@ ${sealFooterHtml(makeSeal({ title: pageTitle + ' ' + monthLabel, rows: sealRows 
           return [
             n(startIdx + i + 1), st(emp.matricule || '-'), st(`${emp.last_name} ${emp.first_name}`, 2), st(emp.position || '-', 3),
             n(cnt.P || 0), n(cnt.CR || 0), n(cnt.CD || 0), n(cnt.JF || 0),
-            n(cnt.AA || 0), n(cnt.AI || 0), n(cnt.CM || 0), n(cnt.AT || 0),
+            n(cnt.AA || 0), n(cnt.AI || 0), n(cnt.CM || 0), n(cnt.AT || 0), n(cnt.SS || 0), n(cnt.MAT || 0),
             n(hs ? hs.h50 : 0), n(hs ? hs.h75 : 0), n(hs ? hs.h100 : 0),
             st(hasIfsp(emp.position) ? '25%' : '-'), st(emp.transport || '-'), st(lastVal),
           ];

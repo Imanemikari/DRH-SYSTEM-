@@ -106,6 +106,9 @@ export const api = {
   addNotification: (type: string, message: string) => ipcRenderer?.invoke('db:add-notification', { type, message }),
   sendTelegram: (text: string) => ipcRenderer?.invoke('db:send-telegram', { text }),
   queueAlert: (kind: string, payload: any) => ipcRenderer?.invoke('db:queue-alert', { kind, payload }),
+  backupNow: () => ipcRenderer?.invoke('db:backup-now'),
+  listBackups: () => ipcRenderer?.invoke('db:list-backups') || [],
+  restoreBackup: (name: string) => ipcRenderer?.invoke('db:restore-backup', { name }),
 
   // Rotation DEPLACE
   getDeplacement: () => ipcRenderer?.invoke('db:get-deplacement') || [],

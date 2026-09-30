@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { Settings as SettingsType } from '../types';
 import { useLang } from '../context/LangContext';
-import { Settings as SettingsIcon, Save, Building2, Printer, Key, Bot, Lock, Send } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Building2, Printer, Key, Bot, Lock, Send, DatabaseBackup, History } from 'lucide-react';
 import { AI_PROVIDERS, aiProviderById } from '../utils/aiProviders';
 import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 import { sha256Hex, makeSalt } from '../utils/accessCode';
@@ -23,6 +23,8 @@ export default function Settings({ navigateTo }: SettingsProps) {
   const [tgChat, setTgChat] = useState('');
   const [tgMsg, setTgMsg] = useState('');
   const [tgOk, setTgOk] = useState(false);
+  const [backups, setBackups] = useState<any[]>([]);
+  const [backupMsg, setBackupMsg] = useState('');
   const [aiProvider, setAiProvider] = useState('pollinations');
   const [aiModel, setAiModel] = useState('');
 
@@ -39,6 +41,7 @@ export default function Settings({ navigateTo }: SettingsProps) {
     setAiModel(savedModel);
     setTgToken(data?.telegram_bot_token || '');
     setTgChat(data?.telegram_chat_id || '');
+    try { setBackups(await api.listBackups()); } catch { /* noop */ }
   };
 
   const persistAiLocal = (key: string, prov: string, model: string) => {
@@ -229,6 +232,41 @@ export default function Settings({ navigateTo }: SettingsProps) {
             } catch { setTgMsg('Erreur'); }
           }} className="btn-secondary"><Send className="w-4 h-4" /> {lang === 'ar' ? 'حفظ واختبار' : 'Sauver + tester'}</button>
         </div>
+      </div>
+
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center"><DatabaseBackup className="w-4 h-4 text-white" /></div>
+          <h2 className="text-base font-semibold text-surface-800 dark:!text-slate-100">{lang === 'ar' ? 'النسخ الاحتياطي' : 'Sauvegarde'}</h2>
+        </div>
+        <p className="text-xs text-surface-500 dark:!text-slate-400 mb-4">{lang === 'ar' ? 'نسخة تلقائية كل يوم عند فتح البرنامج (آخر 30 نسخة). انسخها على USB دورياً.' : 'Sauvegarde auto quotidienne à l\'ouverture (30 dernières conservées). Copiez-les sur USB régulièrement.'}</p>
+        {backupMsg && <p className="mb-3 text-xs font-semibold text-center text-emerald-600 dark:!text-emerald-400">{backupMsg}</p>}
+        <div className="flex justify-end mb-4">
+          <button onClick={async () => {
+            const r: any = await api.backupNow();
+            if (r && r.success) {
+              setBackupMsg((lang === 'ar' ? 'تم إنشاء نسخة: ' : 'Sauvegarde créée : ') + r.name);
+              try { setBackups(await api.listBackups()); } catch { /* noop */ }
+            }
+          }} className="btn-primary"><DatabaseBackup className="w-4 h-4" /> {lang === 'ar' ? 'نسخ الآن' : 'Sauvegarder'}</button>
+        </div>
+        {backups.length > 0 && (
+          <div className="space-y-2 max-h-56 overflow-y-auto">
+            {backups.slice(0, 8).map((b: any) => (
+              <div key={b.name} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-slate-50 dark:!bg-slate-700/50 border border-slate-100 dark:!border-slate-600/50">
+                <div className="flex items-center gap-2 min-w-0">
+                  <History className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="text-xs font-mono text-surface-600 dark:!text-slate-300 truncate">{b.name}</span>
+                  <span className="text-[10px] text-slate-400 shrink-0">{(b.size / 1024).toFixed(0)} Ko</span>
+                </div>
+                <button onClick={async () => {
+                  if (!window.confirm(b.name + '\n' + (lang === 'ar' ? 'استعادة هذه النسخة؟ سيُعاد تشغيل البرنامج.' : 'Restaurer cette sauvegarde ? Le programme va redémarrer.'))) return;
+                  await api.restoreBackup(b.name);
+                }} className="text-[11px] font-bold text-[#14305a] dark:!text-amber-300 hover:underline shrink-0">{lang === 'ar' ? 'استعادة' : 'Restaurer'}</button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

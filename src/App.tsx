@@ -27,7 +27,7 @@ import { useLang } from './context/LangContext';
 type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'reports';
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [currentPage, setCurrentPage] = useState<Page>('reports');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showAI, setShowAI] = useState(false);

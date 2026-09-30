@@ -19,10 +19,10 @@ interface ReportsProps {
 }
 
 const COLORS = ['#14305a', '#f5a623', '#20487c', '#f7c948', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316'];
-const CODES = ['P', 'CR', 'CA', 'JF', 'CM', 'CD', 'AA', 'AI', 'AT'] as const;
+const CODES = ['P', 'CR', 'CA', 'JF', 'CM', 'CD', 'AA', 'AI', 'AT', 'SS', 'MAT'] as const;
 const CODE_COLOR: Record<string, string> = {
   P: '#10b981', CR: '#3b82f6', CA: '#f5a623', JF: '#ef4444', CM: '#ec4899',
-  CD: '#8b5cf6', AA: '#06b6d4', AI: '#64748b', AT: '#f97316',
+  CD: '#8b5cf6', AA: '#06b6d4', AI: '#64748b', AT: '#f97316', SS: '#65a30d', MAT: '#d946ef',
 };
 
 const ChartTooltip = ({ active, payload, label }: any) => {

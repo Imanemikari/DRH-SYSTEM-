@@ -484,6 +484,7 @@ app.whenReady().then(async () => {
   await initDatabase();
   createWindow();
   flushAlertQueue();
+  backupIfNeeded();
 });
 
 app.on('window-all-closed', () => {
@@ -1856,4 +1857,65 @@ ipcMain.handle('license:activate', (e, key) => {
 
 ipcMain.handle('license:generate', (e, { clientName, expiryDate, plan }) => {
   return generateLicenseKey(clientName, expiryDate, plan);
+});
+
+// ===== Automatic backups (daily, dated, retention) =====
+const backupDir = path.join(app.getPath('userData'), 'backups');
+const BACKUP_KEEP = 30;
+function backupFileName(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return 'drh_backup_' + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '_' + p(d.getHours()) + '-' + p(d.getMinutes()) + '.sqlite';
+}
+function pruneBackups() {
+  try {
+    if (!fs.existsSync(backupDir)) return;
+    const files = fs.readdirSync(backupDir).filter((f) => f.startsWith('drh_backup_') && f.endsWith('.sqlite')).sort().reverse();
+    files.slice(BACKUP_KEEP).forEach((f) => { try { fs.unlinkSync(path.join(backupDir, f)); } catch (e) {} });
+  } catch (e) {}
+}
+function doBackup() {
+  try {
+    if (!db) return { success: false, error: 'DB not ready' };
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    saveDb();
+    const name = backupFileName(new Date());
+    const dest = path.join(backupDir, name);
+    fs.copyFileSync(dbPath, dest);
+    pruneBackups();
+    return { success: true, path: dest, name };
+  } catch (e) { return { success: false, error: String((e && e.message) || e) }; }
+}
+function backupIfNeeded() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const files = fs.existsSync(backupDir) ? fs.readdirSync(backupDir) : [];
+    if (!files.some((f) => f.includes(today))) doBackup();
+    else pruneBackups();
+  } catch (e) {}
+}
+ipcMain.handle('db:backup-now', () => doBackup());
+ipcMain.handle('db:list-backups', () => {
+  try {
+    if (!fs.existsSync(backupDir)) return [];
+    return fs.readdirSync(backupDir)
+      .filter((f) => f.startsWith('drh_backup_') && f.endsWith('.sqlite'))
+      .sort().reverse().slice(0, 30)
+      .map((f) => {
+        const st = fs.statSync(path.join(backupDir, f));
+        return { name: f, size: st.size, mtime: st.mtimeMs };
+      });
+  } catch (e) { return []; }
+});
+ipcMain.handle('db:restore-backup', (e, { name }) => {
+  try {
+    const safe = path.basename(String(name || ''));
+    const src = path.join(backupDir, safe);
+    if (!safe.startsWith('drh_backup_') || !fs.existsSync(src)) return { success: false, error: 'NOT_FOUND' };
+    saveDb();
+    const pre = path.join(backupDir, 'drh_backup_pre-restore_' + backupFileName(new Date()));
+    try { fs.copyFileSync(dbPath, pre); } catch (e) {}
+    fs.copyFileSync(src, dbPath);
+    setTimeout(() => { app.relaunch(); app.exit(0); }, 300);
+    return { success: true };
+  } catch (e) { return { success: false, error: String((e && e.message) || e) }; }
 });
