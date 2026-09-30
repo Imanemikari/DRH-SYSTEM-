@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { Settings as SettingsType } from '../types';
 import { useLang } from '../context/LangContext';
-import { Settings as SettingsIcon, Save, Building2, Printer, Key, Bot, Lock, Send, DatabaseBackup, History } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Building2, Printer, Key, Bot, Lock, Send, DatabaseBackup, History, Download, RefreshCw } from 'lucide-react';
 import { AI_PROVIDERS, aiProviderById } from '../utils/aiProviders';
 import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 import { sha256Hex, makeSalt } from '../utils/accessCode';
@@ -26,6 +26,11 @@ export default function Settings({ navigateTo }: SettingsProps) {
   const [backups, setBackups] = useState<any[]>([]);
   const [backupMsg, setBackupMsg] = useState('');
   const [auditRows, setAuditRows] = useState<any[]>([]);
+  const [appVer, setAppVer] = useState('');
+  const [updRepo, setUpdRepo] = useState({ owner: '', repo: '', branch: '' });
+  const [updStatus, setUpdStatus] = useState('');
+  const [updInfo, setUpdInfo] = useState<any>(null);
+  const [updBusy, setUpdBusy] = useState(false);
   const [aiProvider, setAiProvider] = useState('pollinations');
   const [aiModel, setAiModel] = useState('');
 
@@ -249,6 +254,12 @@ export default function Settings({ navigateTo }: SettingsProps) {
               setBackupMsg((lang === 'ar' ? 'تم إنشاء نسخة: ' : 'Sauvegarde créée : ') + r.name);
 try { setBackups(await api.listBackups()); } catch { /* noop */ }
     try { setAuditRows(await api.getAuditLog()); } catch { /* noop */ }
+    try {
+      const v: any = await api.getAppVersion();
+      if (v && v.version) setAppVer(v.version);
+      const s2: any = await api.getSettings();
+      setUpdRepo({ owner: s2?.update_owner || '', repo: s2?.update_repo || '', branch: s2?.update_branch || '' });
+    } catch { /* noop */ }
             }
           }} className="btn-primary"><DatabaseBackup className="w-4 h-4" /> {lang === 'ar' ? 'نسخ الآن' : 'Sauvegarder'}</button>
         </div>
@@ -290,6 +301,51 @@ try { setBackups(await api.listBackups()); } catch { /* noop */ }
             ))}
           </div>
         )}
+      </div>
+
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#14305a] to-[#20487c] flex items-center justify-center"><Download className="w-4 h-4 text-white" /></div>
+          <h2 className="text-base font-semibold text-surface-800 dark:!text-slate-100">{lang === 'ar' ? 'تحديثات البرنامج' : 'Mises à jour'}</h2>
+          {appVer && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:!bg-slate-700 text-slate-600 dark:!text-slate-300" dir="ltr">v{appVer}</span>}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div><label className="label-field">GitHub owner</label><input value={updRepo.owner} onChange={(e) => setUpdRepo({ ...updRepo, owner: e.target.value.trim() })} dir="ltr" placeholder="Imanemikari" className="input-field font-mono" /></div>
+          <div><label className="label-field">Repo</label><input value={updRepo.repo} onChange={(e) => setUpdRepo({ ...updRepo, repo: e.target.value.trim() })} dir="ltr" placeholder="DRH-SYSTEM-" className="input-field font-mono" /></div>
+          <div><label className="label-field">Branch</label><input value={updRepo.branch} onChange={(e) => setUpdRepo({ ...updRepo, branch: e.target.value.trim() })} dir="ltr" placeholder="main" className="input-field font-mono" /></div>
+        </div>
+        {updStatus && <p className="mt-3 text-xs font-semibold text-center text-surface-600 dark:!text-slate-300">{updStatus}</p>}
+        {updInfo && updInfo.available && (
+          <div className="mt-3 p-3 rounded-xl bg-amber-50 dark:!bg-amber-500/10 border border-amber-200 dark:!border-amber-500/30 text-xs text-amber-800 dark:!text-amber-200" dir="ltr">
+            v{updInfo.latest?.version} — {updInfo.latest?.notes || ''}
+          </div>
+        )}
+        <div className="mt-4 flex justify-end gap-2 flex-wrap">
+          <button onClick={async () => {
+            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch }); } catch { /* noop */ }
+          }} className="btn-secondary"><Save className="w-4 h-4" /> {t('setSave')}</button>
+          <button onClick={async () => {
+            setUpdBusy(true);
+            setUpdInfo(null);
+            setUpdStatus(lang === 'ar' ? 'جارٍ التحقق...' : 'Vérification...');
+            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch }); } catch { /* noop */ }
+            try {
+              const r: any = await api.checkUpdates();
+              if (r && r.success) {
+                setUpdInfo(r);
+                setUpdStatus(r.available ? (lang === 'ar' ? 'تحديث متوفر!' : 'Mise à jour disponible !') : (lang === 'ar' ? 'لديك أحدث نسخة' : 'Vous avez la dernière version'));
+              } else setUpdStatus(String((r && r.error) || 'Erreur'));
+            } catch { setUpdStatus('Erreur'); }
+            setUpdBusy(false);
+          }} disabled={updBusy} className="btn-secondary disabled:opacity-50"><RefreshCw className={`w-4 h-4 ${updBusy ? 'animate-spin' : ''}`} /> {lang === 'ar' ? 'التحقق' : 'Vérifier'}</button>
+          {updInfo && updInfo.available && updInfo.latest?.url && (
+            <button onClick={async () => {
+              if (!window.confirm((lang === 'ar' ? 'تثبيت النسخة ' : 'Installer la version ') + updInfo.latest.version + ' ?')) return;
+              setUpdStatus(lang === 'ar' ? 'جارٍ التنزيل والتثبيت... سيُعاد التشغيل.' : 'Téléchargement et installation... redémarrage.');
+              try { await api.installUpdate(updInfo.latest.url, updInfo.latest.version); } catch { /* app restarts */ }
+            }} className="btn-primary"><Download className="w-4 h-4" /> {lang === 'ar' ? 'تثبيت' : 'Installer'}</button>
+          )}
+        </div>
       </div>
     </div>
   );

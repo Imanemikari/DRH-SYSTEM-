@@ -110,6 +110,9 @@ export const api = {
   listBackups: () => ipcRenderer?.invoke('db:list-backups') || [],
   restoreBackup: (name: string) => ipcRenderer?.invoke('db:restore-backup', { name }),
   getAuditLog: () => ipcRenderer?.invoke('db:get-audit-log') || [],
+  getAppVersion: () => ipcRenderer?.invoke('updater:version') || {},
+  checkUpdates: () => ipcRenderer?.invoke('updater:check'),
+  installUpdate: (url: string, version: string) => ipcRenderer?.invoke('updater:install', { url, version }),
 
   // Rotation DEPLACE
   getDeplacement: () => ipcRenderer?.invoke('db:get-deplacement') || [],

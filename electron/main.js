@@ -77,7 +77,7 @@ function auditChannel(channel, args) {
   try {
     if (!db) return;
     if (channel.startsWith('db:get-') || channel.startsWith('db:search-')) return;
-    if (channel === 'license:check' || channel === 'db:mark-notifications-read' || channel === 'ai:chat') return;
+    if (channel === 'license:check' || channel === 'db:mark-notifications-read' || channel === 'ai:chat' || channel === 'updater:check' || channel === 'updater:version') return;
     let details = '';
     try { details = JSON.stringify(args || [], auditScrub).slice(0, 500); } catch (e) { details = ''; }
     runSql('INSERT INTO audit_log (actor, action, details) VALUES (?, ?, ?)', ['local', channel, details]);
@@ -1938,6 +1938,133 @@ ipcMain.handle('license:activate', (e, key) => {
 
 ipcMain.handle('license:generate', (e, { clientName, expiryDate, plan }) => {
   return generateLicenseKey(clientName, expiryDate, plan);
+});
+
+// ===== Auto-updater (full-package zip hosted on GitHub) =====
+const UPDATE_DEFAULTS = { owner: 'Imanemikari', repo: 'DRH-SYSTEM-', branch: 'main' };
+function updateConfig() {
+  try {
+    const rows = queryAll("SELECT key, value FROM settings WHERE key IN ('update_owner','update_repo','update_branch')");
+    const m = {};
+    rows.forEach((r) => { m[r.key] = r.value; });
+    return {
+      owner: m.update_owner || UPDATE_DEFAULTS.owner,
+      repo: m.update_repo || UPDATE_DEFAULTS.repo,
+      branch: m.update_branch || UPDATE_DEFAULTS.branch,
+    };
+  } catch (e) { return { owner: UPDATE_DEFAULTS.owner, repo: UPDATE_DEFAULTS.repo, branch: UPDATE_DEFAULTS.branch }; }
+}
+function cmpVersions(a, b) {
+  const pa = String(a || '0').split('.').map((x) => parseInt(x, 10) || 0);
+  const pb = String(b || '0').split('.').map((x) => parseInt(x, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d !== 0) return d > 0 ? 1 : -1;
+  }
+  return 0;
+}
+function httpsGetJson(url, timeoutMs) {
+  timeoutMs = timeoutMs || 15000;
+  const fetchOnce = (u) => new Promise((resolve, reject) => {
+    const req = https.get(u, { headers: { 'User-Agent': 'DRH-System-updater' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) return resolve({ redirect: res.headers.location });
+      if (res.statusCode !== 200) return reject(new Error('HTTP ' + res.statusCode));
+      let d = '';
+      res.on('data', (c) => { d += c; });
+      res.on('end', () => {
+        try { resolve({ json: JSON.parse(d) }); } catch (e) { reject(new Error('bad json')); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('timeout')); });
+  });
+  return (async () => {
+    let u = url;
+    for (let i = 0; i < 3; i++) {
+      const r = await fetchOnce(u);
+      if (r.redirect) { u = r.redirect; continue; }
+      return r.json;
+    }
+    throw new Error('too many redirects');
+  })();
+}
+function downloadFile(url, dest, timeoutMs) {
+  timeoutMs = timeoutMs || 120000;
+  const getOnce = (u) => new Promise((resolve, reject) => {
+    const req = https.get(u, { headers: { 'User-Agent': 'DRH-System-updater' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        return resolve({ redirect: res.headers.location });
+      }
+      if (res.statusCode !== 200) { res.resume(); return reject(new Error('HTTP ' + res.statusCode)); }
+      const ws = fs.createWriteStream(dest);
+      res.pipe(ws);
+      ws.on('finish', () => resolve({ done: true }));
+      ws.on('error', reject);
+    });
+    req.on('error', reject);
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('timeout')); });
+  });
+  return (async () => {
+    let u = url;
+    for (let i = 0; i < 4; i++) {
+      const r = await getOnce(u);
+      if (r.redirect) { u = r.redirect; continue; }
+      return dest;
+    }
+    throw new Error('too many redirects');
+  })();
+}
+ipcMain.handle('updater:version', () => {
+  try { return { version: app.getVersion() }; } catch (e) { return { version: '0.0.0' }; }
+});
+ipcMain.handle('updater:check', async () => {
+  try {
+    const c = updateConfig();
+    const data = await httpsGetJson('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + c.branch + '/updates/latest.json');
+    const cur = app.getVersion();
+    return { success: true, current: cur, latest: data, available: !!(data && data.version && cmpVersions(data.version, cur) > 0), config: c };
+  } catch (err) { return { success: false, error: String((err && err.message) || err) }; }
+});
+ipcMain.handle('updater:install', async (e, { url, version }) => {
+  try {
+    if (!url || !/^https:\/\//.test(url)) return { success: false, error: 'BAD_URL' };
+    const tmpDir = path.join(app.getPath('temp'), 'drh_update');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    const zipPath = path.join(tmpDir, 'update.zip');
+    try { if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath); } catch (e) {}
+    await downloadFile(url, zipPath);
+    const fd = fs.openSync(zipPath, 'r');
+    const magic = Buffer.alloc(2);
+    fs.readSync(fd, magic, 0, 2, 0);
+    fs.closeSync(fd);
+    if (magic.toString() !== 'PK') return { success: false, error: 'BAD_ZIP' };
+    const exePath = process.execPath;
+    const instDir = path.dirname(exePath);
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    const batPath = path.join(tmpDir, 'apply_update.bat');
+    const bat = '@echo off\r\n'
+      + 'set INSTDIR=' + instDir + '\r\n'
+      + 'set EXEFILE=' + exePath + '\r\n'
+      + 'set ZIPFILE=' + zipPath + '\r\n'
+      + 'for %%I in ("%INSTDIR%") do set PARENT=%%~dpI\r\n'
+      + 'for %%I in ("%INSTDIR%") do set DIRNAME=%%~nxI\r\n'
+      + ':waitloop\r\n'
+      + 'tasklist /FI "IMAGENAME eq DRH-System.exe" 2>NUL | find /I "DRH-System.exe" >NUL\r\n'
+      + 'if not errorlevel 1 ( timeout /t 1 /nobreak >NUL & goto waitloop )\r\n'
+      + 'set STAMP=%DATE:~6,4%-%DATE:~3,2%-%DATE:~0,2%_%TIME:~0,2%-%TIME:~3,2%\r\n'
+      + 'set STAMP=%STAMP: =0%\r\n'
+      + 'if exist "%PARENT%%DIRNAME%.bak-%STAMP%" rmdir /S /Q "%PARENT%%DIRNAME%.bak-%STAMP%"\r\n'
+      + 'move "%INSTDIR%" "%PARENT%%DIRNAME%.bak-%STAMP%" >NUL\r\n'
+      + 'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath \'"%ZIPFILE%"\' -DestinationPath \'"%PARENT%"\' -Force"\r\n'
+      + 'start "" "%EXEFILE%"\r\n'
+      + 'exit\r\n';
+    fs.writeFileSync(batPath, bat, 'utf8');
+    const { spawn } = require('child_process');
+    spawn('cmd.exe', ['/c', batPath], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+    setTimeout(() => { app.exit(0); }, 800);
+    return { success: true };
+  } catch (err) { return { success: false, error: String((err && err.message) || err) }; }
 });
 
 // ===== Automatic backups (daily, dated, retention) =====
