@@ -26,3 +26,6 @@ extract_ole.js
 extract_word.js
 find_images.js
 ole_parse.js
+
+*.zip
+*.rar

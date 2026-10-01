@@ -27,7 +27,7 @@ export default function Settings({ navigateTo }: SettingsProps) {
   const [backupMsg, setBackupMsg] = useState('');
   const [auditRows, setAuditRows] = useState<any[]>([]);
   const [appVer, setAppVer] = useState('');
-  const [updRepo, setUpdRepo] = useState({ owner: '', repo: '', branch: '' });
+  const [updRepo, setUpdRepo] = useState({ owner: '', repo: '', branch: '', manifest: '' });
   const [updStatus, setUpdStatus] = useState('');
   const [updInfo, setUpdInfo] = useState<any>(null);
   const [updBusy, setUpdBusy] = useState(false);
@@ -258,7 +258,7 @@ try { setBackups(await api.listBackups()); } catch { /* noop */ }
       const v: any = await api.getAppVersion();
       if (v && v.version) setAppVer(v.version);
       const s2: any = await api.getSettings();
-      setUpdRepo({ owner: s2?.update_owner || '', repo: s2?.update_repo || '', branch: s2?.update_branch || '' });
+      setUpdRepo({ owner: s2?.update_owner || '', repo: s2?.update_repo || '', branch: s2?.update_branch || '', manifest: s2?.update_manifest_url || '' });
     } catch { /* noop */ }
             }
           }} className="btn-primary"><DatabaseBackup className="w-4 h-4" /> {lang === 'ar' ? 'نسخ الآن' : 'Sauvegarder'}</button>
@@ -314,6 +314,9 @@ try { setBackups(await api.listBackups()); } catch { /* noop */ }
           <div><label className="label-field">Repo</label><input value={updRepo.repo} onChange={(e) => setUpdRepo({ ...updRepo, repo: e.target.value.trim() })} dir="ltr" placeholder="DRH-SYSTEM-" className="input-field font-mono" /></div>
           <div><label className="label-field">Branch</label><input value={updRepo.branch} onChange={(e) => setUpdRepo({ ...updRepo, branch: e.target.value.trim() })} dir="ltr" placeholder="main" className="input-field font-mono" /></div>
         </div>
+        <div className="mt-4">
+          <div><label className="label-field">{lang === 'ar' ? 'رابط manifest مخصص (Google Drive) — اختياري' : 'URL manifest personnalisée (Google Drive) — optionnel'}</label><input value={updRepo.manifest || ''} onChange={(e) => setUpdRepo({ ...updRepo, manifest: e.target.value.trim() })} dir="ltr" placeholder="https://drive.google.com/uc?export=download&id=..." className="input-field font-mono" /></div>
+        </div>
         {updStatus && <p className="mt-3 text-xs font-semibold text-center text-surface-600 dark:!text-slate-300">{updStatus}</p>}
         {updInfo && updInfo.available && (
           <div className="mt-3 p-3 rounded-xl bg-amber-50 dark:!bg-amber-500/10 border border-amber-200 dark:!border-amber-500/30 text-xs text-amber-800 dark:!text-amber-200" dir="ltr">
@@ -322,13 +325,13 @@ try { setBackups(await api.listBackups()); } catch { /* noop */ }
         )}
         <div className="mt-4 flex justify-end gap-2 flex-wrap">
           <button onClick={async () => {
-            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch }); } catch { /* noop */ }
+            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch, update_manifest_url: updRepo.manifest }); } catch { /* noop */ }
           }} className="btn-secondary"><Save className="w-4 h-4" /> {t('setSave')}</button>
           <button onClick={async () => {
             setUpdBusy(true);
             setUpdInfo(null);
             setUpdStatus(lang === 'ar' ? 'جارٍ التحقق...' : 'Vérification...');
-            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch }); } catch { /* noop */ }
+            try { await api.updateSettings({ update_owner: updRepo.owner, update_repo: updRepo.repo, update_branch: updRepo.branch, update_manifest_url: updRepo.manifest }); } catch { /* noop */ }
             try {
               const r: any = await api.checkUpdates();
               if (r && r.success) {

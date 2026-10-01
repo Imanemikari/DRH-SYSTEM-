@@ -1944,15 +1944,16 @@ ipcMain.handle('license:generate', (e, { clientName, expiryDate, plan }) => {
 const UPDATE_DEFAULTS = { owner: 'Imanemikari', repo: 'DRH-SYSTEM-', branch: 'main' };
 function updateConfig() {
   try {
-    const rows = queryAll("SELECT key, value FROM settings WHERE key IN ('update_owner','update_repo','update_branch')");
+    const rows = queryAll("SELECT key, value FROM settings WHERE key IN ('update_owner','update_repo','update_branch','update_manifest_url')");
     const m = {};
     rows.forEach((r) => { m[r.key] = r.value; });
     return {
       owner: m.update_owner || UPDATE_DEFAULTS.owner,
       repo: m.update_repo || UPDATE_DEFAULTS.repo,
       branch: m.update_branch || UPDATE_DEFAULTS.branch,
+      manifest: m.update_manifest_url || '',
     };
-  } catch (e) { return { owner: UPDATE_DEFAULTS.owner, repo: UPDATE_DEFAULTS.repo, branch: UPDATE_DEFAULTS.branch }; }
+  } catch (e) { return { owner: UPDATE_DEFAULTS.owner, repo: UPDATE_DEFAULTS.repo, branch: UPDATE_DEFAULTS.branch, manifest: '' }; }
 }
 function cmpVersions(a, b) {
   const pa = String(a || '0').split('.').map((x) => parseInt(x, 10) || 0);
@@ -2021,7 +2022,8 @@ ipcMain.handle('updater:version', () => {
 ipcMain.handle('updater:check', async () => {
   try {
     const c = updateConfig();
-    const data = await httpsGetJson('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + c.branch + '/updates/latest.json');
+    const manifestUrl = c.manifest || ('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + c.branch + '/updates/latest.json');
+    const data = await httpsGetJson(manifestUrl);
     const cur = app.getVersion();
     return { success: true, current: cur, latest: data, available: !!(data && data.version && cmpVersions(data.version, cur) > 0), config: c };
   } catch (err) { return { success: false, error: String((err && err.message) || err) }; }
