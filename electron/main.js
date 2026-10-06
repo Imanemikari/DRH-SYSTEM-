@@ -549,6 +549,7 @@ function createWindow() {
     minHeight: 700,
     frame: false,
     titleBarStyle: 'hidden',
+    icon: path.join(__dirname, '..', 'build', 'icon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
