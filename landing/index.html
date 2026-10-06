@@ -3,7 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRH — نظام إدارة الموارد البشرية</title>
+    <title>DRH — نظام إدارة الموارد البشرية | برنامج HR عربي/فرنسي يعمل بدون إنترنت</title>
+    <meta name="description" content="DRH — برنامج سطح مكتب لإدارة الموارد البشرية: ملفات الموظفين، الرواتب CNAS/IRG، العقود ثنائية اللغة، الإجازات، مساعد ذكاء اصطناعي. يعمل بدون إنترنت. سعر واحد بدون اشتراك.">
+    <meta name="keywords" content="برنامج موارد بشرية, logiciel RH Algérie, gestion paie, CNAS IRG, برنامج رواتب الجزائر, HR software arabe">
+    <meta property="og:title" content="DRH — نظام إدارة الموارد البشرية للشركات العربية">
+    <meta property="og:description" content="ثنائي اللغة عربي/فرنسي • يعمل بدون إنترنت • ذكاء اصطناعي مدمج • سعر واحد بدون اشتراك">
+    <meta property="og:type" content="website">
+    <!-- ============================================================
+      ⚙️ إعدادات البائع — عدّل هذه القيم فقط قبل النشر:
+      1) SELLER_WHATSAPP: رقم واتساب بالصيغة الدولية بدون + (مثال: 213555000000)
+      2) SELLER_EMAIL: بريد استقبال الطلبات
+      3) DOWNLOAD_URL: رابط تحميل النسخة التجريبية (Google Drive / Mega)
+      4) APP_VERSION: رقم النسخة الحالية
+    ============================================================ -->
+    <script>
+        var SELLER_WHATSAPP = "213000000000"; // ← ضع رقمك هنا
+        var SELLER_EMAIL = "toumi.bentamra@gmail.com";
+        var DOWNLOAD_URL = "#download"; // ← ضع رابط Google Drive هنا
+        var APP_VERSION = "1.1.1";
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script>
@@ -24,6 +42,8 @@
                 <li><a href="#problem">المشكلة</a></li>
                 <li><a href="#features">المزايا</a></li>
                 <li><a href="#pricing">التسعير</a></li>
+                <li><a href="#download">تحميل النسخة التجريبية</a></li>
+                <li><a href="#faq">أسئلة شائعة</a></li>
                 <li><a href="#contact">التواصل</a></li>
             </ul>
             <a href="#contact" class="btn btn-nav">جرّب مجاناً</a>
@@ -283,9 +303,9 @@
             </div>
             <div class="currency-bar">
                 <span>العملة:</span>
-                <button class="curr-btn active" onclick="setCurrency('DZD')">🇩🇿 DZD دج</button>
-                <button class="curr-btn" onclick="setCurrency('USD')">🇺🇸 USD $</button>
-                <button class="curr-btn" onclick="setCurrency('USDT')">💎 USDT</button>
+                <button class="curr-btn active" onclick="setCurrency('DZD', this)">🇩🇿 DZD دج</button>
+                <button class="curr-btn" onclick="setCurrency('USD', this)">🇺🇸 USD $</button>
+                <button class="curr-btn" onclick="setCurrency('USDT', this)">💎 USDT</button>
             </div>
             <div class="pricing-grid">
                 <div class="pricing-card">
@@ -303,7 +323,7 @@
                         <li class="excluded">تصدير Word</li>
                         <li class="excluded">مساعد الذكاء الاصطناعي</li>
                     </ul>
-                    <a href="#contact" class="btn btn-outline btn-block">ابدأ الآن</a>
+                    <a href="#contact" class="btn btn-outline btn-block order-btn" data-plan="START">اطلب Start الآن</a>
                 </div>
                 <div class="pricing-card popular">
                     <div class="popular-badge">الأكثر طلباً</div>
@@ -321,7 +341,7 @@
                         <li class="included">لوحة معلومات ذكية</li>
                         <li class="included">دعم فني</li>
                     </ul>
-                    <a href="#contact" class="btn btn-primary btn-block">ابدأ الآن</a>
+                    <a href="#contact" class="btn btn-primary btn-block order-btn" data-plan="PME">اطلب PME الآن</a>
                 </div>
                 <div class="pricing-card">
                     <div class="pricing-header">
@@ -338,7 +358,7 @@
                         <li class="included">تدريب في الموقع</li>
                         <li class="included">تحديثات مجانية مدى الحياة</li>
                     </ul>
-                    <a href="#contact" class="btn btn-outline btn-block">تواصل معنا</a>
+                    <a href="#contact" class="btn btn-outline btn-block order-btn" data-plan="PRO">اطلب Pro الآن</a>
                 </div>
             </div>
             <div class="pricing-note">
@@ -371,23 +391,92 @@
                     <div class="payment-card">
                         <div class="payment-icon">DZD</div>
                         <h4>الجزائر — بريدي موب</h4>
-                        <p class="payment-detail">CCP: <strong>007999999001096716738</strong></p>
+                        <p class="payment-detail">CCP: <strong id="ccpNum">007999999001096716738</strong></p>
                         <p class="payment-note">ارسل المبلغ + اسمك عبر بريدي موب</p>
+                        <button type="button" class="btn btn-outline copy-btn" data-copy="007999999001096716738">نسخ رقم CCP</button>
                     </div>
                     <div class="payment-card">
                         <div class="payment-icon crypto">USDT</div>
                         <h4>الدول العربية — USDT TRC20</h4>
-                        <p class="payment-detail">TRC20: <code>TRG5pAgqzjmtLc5C5t3CuixjR2uDYyjTLR</code></p>
+                        <p class="payment-detail">TRC20: <code id="trcAddr">TRG5pAgqzjmtLc5C5t3CuixjR2uDYyjTLR</code></p>
                         <p class="payment-note">التحويل عبر شبكة TRON</p>
+                        <button type="button" class="btn btn-outline copy-btn" data-copy="TRG5pAgqzjmtLc5C5t3CuixjR2uDYyjTLR">نسخ العنوان</button>
                     </div>
                     <div class="payment-card">
                         <div class="payment-icon crypto">USDT</div>
                         <h4>الدول العربية — USDT BEP20</h4>
-                        <p class="payment-detail">BEP20: <code>0xd475ec76afe69333422c2623b81640c974c5fcb8</code></p>
+                        <p class="payment-detail">BEP20: <code id="bepAddr">0xd475ec76afe69333422c2623b81640c974c5fcb8</code></p>
                         <p class="payment-note">التحويل عبر شبكة BSC</p>
+                        <button type="button" class="btn btn-outline copy-btn" data-copy="0xd475ec76afe69333422c2623b81640c974c5fcb8">نسخ العنوان</button>
                     </div>
                 </div>
                 <p class="payment-instructions">بعد التحويل، أرسل إثبات الدفع (screenshot) على البريد: <a href="mailto:toumi.bentamra@gmail.com">toumi.bentamra@gmail.com</a> مع اسمك واسم الشركة</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="download" id="download">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge accent">تجربة مجانية</span>
+                <h2>حمّل النسخة التجريبية — <span id="verBadge">v1.1.1</span></h2>
+                <p>Windows 64-bit • يعمل بدون إنترنت • وضع تجريبي (Démo) مدمج — جرّب كل الوظائف قبل الشراء</p>
+            </div>
+            <div class="download-steps">
+                <div class="download-step">
+                    <div class="solution-num">01</div>
+                    <h3>حمّل البرنامج</h3>
+                    <p>اضغط زر التحميل واحصل على ملف التثبيت (ZIP). فك الضغط وشغّل <code>DRH-System.exe</code> — بدون تثبيت معقد.</p>
+                </div>
+                <div class="download-step">
+                    <div class="solution-num">02</div>
+                    <h3>جرّب الوضع التجريبي</h3>
+                    <p>عند شاشة الترخيص اختر <strong>وضع Démo</strong> واستكشف: الموظفين، الرواتب، العقود، الحضور، المساعد الذكي.</p>
+                </div>
+                <div class="download-step">
+                    <div class="solution-num">03</div>
+                    <h3>اطلب مفتاح التفعيل</h3>
+                    <p>أعجبك البرنامج؟ املأ <a href="#contact">نموذج الطلب</a>، ادفع عبر بريدي موب أو USDT، واستلم مفتاحك الخاص بجهازك خلال 24 ساعة.</p>
+                </div>
+            </div>
+            <div class="download-cta">
+                <a href="#" id="downloadBtn" class="btn btn-primary btn-lg">⬇ حمّل النسخة التجريبية (Windows 64-bit)</a>
+                <p class="download-note">بعد التحميل: فك الضغط ← شغّل DRH-System.exe ← اختر وضع Démo. مفتاح التفعيل يُرسل بعد الشراء فقط.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">أسئلة شائعة</span>
+                <h2>قبل أن تشتري — كل ما تحتاج معرفته</h2>
+            </div>
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary>هل أحتاج إلى إنترنت لاستخدام البرنامج؟</summary>
+                    <p>لا. DRH برنامج سطح مكتب (Windows) يعمل بالكامل بدون إنترنت. بياناتك تبقى على جهازك. الإنترنت مطلوب فقط لتحميل البرنامج ومرة واحدة لتفعيل المفتاح، وللمساعد الذكي.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>كيف أستلم البرنامج بعد الدفع؟</summary>
+                    <p>3 خطوات: (1) املأ نموذج الطلب وأرسله عبر واتساب أو البريد، (2) حوّل المبلغ عبر بريدي موب/CCP أو USDT وأرسل إثبات الدفع، (3) تستلم خلال 24 ساعة: رابط التحميل + مفتاح التفعيل الخاص بجهازك + دليل التثبيت.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>هل المفتاح يعمل على عدة أجهزة؟</summary>
+                    <p>كل مفتاح مرتبط بجهاز واحد (حماية ضد النسخ). للفروع المتعددة أو عدة أجهزة تواصل معنا لعرض سعر خاص متعدد التراخيص.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>هل السعر اشتراك شهري؟</summary>
+                    <p>لا — تدفع مرة واحدة وتستخدم للأبد. الصيانة والتحديثات السنوية (قوانين CNAS/IRG) اختيارية بـ 10% من سعر الترخيص سنوياً.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>هل يدعم قانون العمل في بلدي؟</summary>
+                    <p>البرنامج مصمم أساساً للجزائر (CNAS 9% + IRG + قانون 90-11) ويعمل لجميع الدول العربية لإدارة الملفات والعقود والإجازات والحضور. حدد دولتك في نموذج الطلب لنرسل لك الإعداد المناسب.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>ماذا لو لم يعجبني البرنامج؟</summary>
+                    <p>لهذا توجد النسخة التجريبية المجانية بوضع Démo — جرّب كل شيء قبل أن تدفع ديناراً واحداً. لا نطلب أي بطاقة بنكية للتجربة.</p>
+                </details>
             </div>
         </div>
     </section>
@@ -439,27 +528,27 @@
     <section class="cta" id="contact">
         <div class="container">
             <div class="cta-content">
-                <h2>ابدأ اليوم مجاناً</h2>
-                <p>تجربة مجانية لمدة 30 يوم بدون بطاقة بنكية. بدون التزام.</p>
+                <h2>اطلب نسختك الآن</h2>
+                <p>املأ الطلب ← أرسله عبر <strong>واتساب</strong> أو <strong>البريد</strong> ← ادفع ← استلم مفتاحك خلال 24 ساعة.</p>
                 <form class="contact-form" id="contactForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>الاسم الكامل</label>
-                            <input type="text" placeholder="محمد بن عمر" required>
+                            <label>الاسم الكامل *</label>
+                            <input type="text" id="fName" placeholder="محمد بن عمر" required>
                         </div>
                         <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" placeholder="contact@entreprise.dz" required>
+                            <label>البريد الإلكتروني *</label>
+                            <input type="email" id="fEmail" placeholder="contact@entreprise.dz" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>رقم الهاتف</label>
-                            <input type="tel" placeholder="+213 555 00 00 00">
+                            <label>رقم الهاتف / واتساب *</label>
+                            <input type="tel" id="fPhone" placeholder="+213 555 00 00 00" required>
                         </div>
                         <div class="form-group">
-                            <label>اسم الشركة</label>
-                            <input type="text" placeholder="الشركة الجزائرية للبناء" required>
+                            <label>اسم الشركة *</label>
+                            <input type="text" id="fCompany" placeholder="الشركة الجزائرية للبناء" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -490,30 +579,41 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>عدد الموظفين</label>
-                            <select>
-                                <option>1 - 10 موظفين</option>
-                                <option>11 - 50 موظف</option>
-                                <option>51 - 200 موظف</option>
-                                <option>أكثر من 200 موظف</option>
+                            <label>عدد الموظفين *</label>
+                            <select id="fEmployees">
+                                <option value="START">1 - 10 موظفين (Start)</option>
+                                <option value="PME" selected>11 - 50 موظف (PME) ⭐</option>
+                                <option value="PRO">51 - 200 موظف (Pro)</option>
+                                <option value="ENTREPRISE">أكثر من 200 موظف (Entreprise)</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>طريقة الدفع المفضلة</label>
-                            <select>
-                                <option>بريدي موب (الجزائر)</option>
-                                <option>USDT TRC20</option>
-                                <option>USDT BEP20</option>
+                            <select id="fPay">
+                                <option value="بريدي موب / CCP (الجزائر)">بريدي موب / CCP (الجزائر)</option>
+                                <option value="USDT TRC20">USDT TRC20</option>
+                                <option value="USDT BEP20">USDT BEP20</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>الرسالة</label>
-                            <textarea placeholder="أخبرنا عن احتياجاتك..."></textarea>
+                            <label>ملاحظات (اختياري)</label>
+                            <textarea id="fMsg" placeholder="أخبرنا عن احتياجاتك..."></textarea>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">أرسل الطلب — جرّب مجاناً</button>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">تأكيد الطلب — اختر طريقة الإرسال ↓</button>
+                    <div class="order-result" id="orderResult" style="display:none">
+                        <h3>✅ تم تجهيز طلبك — رقم الطلب: <span id="orderRef"></span></h3>
+                        <p class="order-pack">الباقة: <strong id="orderPack"></strong> — السعر: <strong id="orderPrice"></strong></p>
+                        <p>اختر طريقة الإرسال (تصلكم مباشرة):</p>
+                        <div class="order-actions">
+                            <a href="#" id="orderWhats" target="_blank" class="btn btn-primary">📱 إرسال عبر واتساب</a>
+                            <a href="#" id="orderMail" class="btn btn-outline">✉️ إرسال عبر البريد</a>
+                            <button type="button" id="orderCopy" class="btn btn-outline">📋 نسخ نص الطلب</button>
+                        </div>
+                        <p class="order-next">بعد الإرسال: حوّل المبلغ (قسم الدفع أعلاه) وأرسل إثبات الدفع — تستلم رابط التحميل + مفتاح التفعيل خلال 24 ساعة.</p>
+                    </div>
                 </form>
                 <div class="contact-info">
                     <div class="contact-item">
@@ -522,7 +622,7 @@
                     </div>
                     <div class="contact-item">
                         <span class="ci-icon">phone</span>
-                        <span>واتساب: تواصل عبر البريد الإلكتروني</span>
+                        <a href="#" id="contactWhats">راسلنا واتساب مباشرة</a>
                     </div>
                 </div>
             </div>
@@ -540,14 +640,18 @@
                     <a href="#home">الرئيسية</a>
                     <a href="#features">المزايا</a>
                     <a href="#pricing">التسعير</a>
+                    <a href="#download">تحميل</a>
+                    <a href="#faq">أسئلة شائعة</a>
                     <a href="#contact">التواصل</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>2026 DRH — جميع الحقوق محفوظة — صنع في الجزائر 🇩🇿 — متاح في 22 دولة عربية</p>
+                <p>2026 DRH <span id="verFoot">v1.1.1</span> — جميع الحقوق محفوظة — صنع في الجزائر 🇩🇿 — متاح في 22 دولة عربية</p>
             </div>
         </div>
     </footer>
+
+    <a href="#" id="whatsFloat" target="_blank" class="whats-float" aria-label="واتساب">✆</a>
 
     <script src="script.js"></script>
 </body>

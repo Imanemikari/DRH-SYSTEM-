@@ -56,28 +56,132 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
 
-    // Form submission
+    // ---- Seller config (edit values in index.html head) ----
+    var WA = (typeof SELLER_WHATSAPP !== 'undefined') ? SELLER_WHATSAPP : '';
+    var SMAIL = (typeof SELLER_EMAIL !== 'undefined') ? SELLER_EMAIL : 'toumi.bentamra@gmail.com';
+    var DL = (typeof DOWNLOAD_URL !== 'undefined') ? DOWNLOAD_URL : '#download';
+    var VER = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : '1.1.1';
+
+    var PACKS = {
+        START: { name: 'DRH Start (1-10 موظفين)', dzd: 25000 },
+        PME: { name: 'DRH PME (11-50 موظف) ⭐', dzd: 75000 },
+        PRO: { name: 'DRH Pro (51-200 موظف)', dzd: 150000 },
+        ENTREPRISE: { name: 'DRH Entreprise (200+ موظف — حسب الطلب)', dzd: 0 }
+    };
+
+    // Version badges + download + whatsapp links
+    var vb = document.getElementById('verBadge');
+    if (vb) vb.textContent = 'v' + VER;
+    var vf = document.getElementById('verFoot');
+    if (vf) vf.textContent = 'v' + VER;
+    var dlBtn = document.getElementById('downloadBtn');
+    if (dlBtn) dlBtn.href = DL;
+    var wf = document.getElementById('whatsFloat');
+    if (wf && WA && WA.indexOf('000000') === -1) {
+        wf.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('مرحباً، أريد الاستفسار عن برنامج DRH');
+    } else if (wf) {
+        wf.style.display = 'none'; // hidden until seller sets the number
+    }
+    var cw = document.getElementById('contactWhats');
+    if (cw) {
+        if (WA && WA.indexOf('000000') === -1) {
+            cw.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('مرحباً، أريد الاستفسار عن برنامج DRH');
+        } else {
+            cw.href = 'mailto:' + SMAIL;
+            cw.textContent = SMAIL;
+        }
+    }
+
+    // Plan preselect from pricing buttons
+    document.querySelectorAll('.order-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var plan = btn.getAttribute('data-plan');
+            var sel = document.getElementById('fEmployees');
+            if (sel && plan && PACKS[plan]) sel.value = plan;
+        });
+    });
+
+    // Copy buttons (payment addresses, order text)
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var txt = btn.getAttribute('data-copy') || '';
+            copyText(txt, btn);
+        });
+    });
+    function copyText(txt, btn) {
+        function done() {
+            if (!btn) return;
+            var o = btn.textContent;
+            btn.textContent = 'تم النسخ ✓';
+            setTimeout(function() { btn.textContent = o; }, 2000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt).then(done).catch(function() { fallback(); });
+        } else { fallback(); }
+        function fallback() {
+            var ta = document.createElement('textarea');
+            ta.value = txt;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            done();
+        }
+    }
+
+    // ---- Real order form: builds WhatsApp / Email order ----
     var contactForm = document.getElementById('contactForm');
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        var btn = this.querySelector('button[type="submit"]');
-        var originalText = btn.textContent;
-        btn.textContent = 'جاري الإرسال...';
-        btn.disabled = true;
+        var name = val('fName'), email = val('fEmail'), phone = val('fPhone'),
+            company = val('fCompany'), country = countryLabel(val('formCountry')),
+            plan = val('fEmployees'), pay = val('fPay'), msg = val('fMsg');
 
-        setTimeout(function() {
-            btn.textContent = 'تم الإرسال بنجاح!';
-            btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        if (!name || !email || !phone || !company) {
+            alert('يرجى ملء الحقول الإلزامية (*)');
+            return;
+        }
 
-            setTimeout(function() {
-                btn.textContent = originalText;
-                btn.style.background = '';
-                btn.disabled = false;
-                contactForm.reset();
-            }, 3000);
-        }, 1500);
+        var ref = 'DRH-' + Date.now().toString(36).toUpperCase();
+        var pack = PACKS[plan] || PACKS.PME;
+        var price = pack.dzd === 0 ? 'حسب الطلب' : pack.dzd.toLocaleString() + ' دج';
+
+        var text = 'طلب جديد ' + ref + '\n'
+            + '------------------------\n'
+            + 'الاسم: ' + name + '\n'
+            + 'الشركة: ' + company + '\n'
+            + 'الدولة: ' + country + '\n'
+            + 'الهاتف: ' + phone + '\n'
+            + 'البريد: ' + email + '\n'
+            + 'الباقة: ' + pack.name + '\n'
+            + 'السعر: ' + price + '\n'
+            + 'الدفع: ' + pay + '\n'
+            + (msg ? 'ملاحظات: ' + msg + '\n' : '')
+            + '------------------------\n'
+            + 'أرغب في شراء برنامج DRH، المرجو إرسال تعليمات الدفع.';
+
+        document.getElementById('orderRef').textContent = ref;
+        document.getElementById('orderPack').textContent = pack.name;
+        document.getElementById('orderPrice').textContent = price;
+        document.getElementById('orderWhats').href =
+            'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+        document.getElementById('orderMail').href =
+            'mailto:' + SMAIL + '?subject=' + encodeURIComponent('طلب ' + ref + ' — ' + pack.name)
+            + '&body=' + encodeURIComponent(text);
+        document.getElementById('orderCopy').onclick = function() { copyText(text, this); };
+        document.getElementById('orderResult').style.display = 'block';
+        document.getElementById('orderResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+
+    function val(id) {
+        var el = document.getElementById(id);
+        return el ? (el.value || '').trim() : '';
+    }
+    function countryLabel(code) {
+        var map = { DZ: 'الجزائر', TN: 'تونس', MA: 'المغرب', LY: 'ليبيا', EG: 'مصر', IQ: 'العراق', JO: 'الأردن', LB: 'لبنان', SY: 'سوريا', PS: 'فلسطين', SA: 'السعودية', AE: 'الإمارات', QA: 'قطر', KW: 'الكويت', BH: 'البحرين', OM: 'عُمان', YE: 'اليمن', SD: 'السودان', MR: 'موريتانيا', DJ: 'جيبوتي', KM: 'جزر القمر' };
+        return map[code] || code;
+    }
 
     // Counter animation for hero stats
     function animateValue(element, start, end, duration) {
@@ -128,19 +232,25 @@ document.addEventListener('DOMContentLoaded', function() {
     setCurrency('DZD');
 });
 
-// Currency switching
+// Currency switching — btn is optional (safe for programmatic calls)
 var currentCurrency = 'DZD';
 
-function setCurrency(code) {
+function setCurrency(code, btn) {
     currentCurrency = code;
     var symbol = currencySymbols[code] || code;
     var rate = currencyRates[code] || 1;
 
     // Update active button
-    document.querySelectorAll('.curr-btn').forEach(function(btn) {
-        btn.classList.remove('active');
+    document.querySelectorAll('.curr-btn').forEach(function(b) {
+        b.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
+    } else {
+        document.querySelectorAll('.curr-btn').forEach(function(b) {
+            if (b.textContent.indexOf(code) !== -1) b.classList.add('active');
+        });
+    }
 
     // Update prices
     document.querySelectorAll('.price[data-dzd]').forEach(function(el) {

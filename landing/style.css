@@ -1148,4 +1148,155 @@ body {
     .pricing-grid {
         grid-template-columns: 1fr;
     }
+
+    .download-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .order-actions {
+        flex-direction: column;
+    }
+
+    .whats-float {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+        bottom: 20px;
+        left: 20px;
+    }
+}
+
+/* ===== SALES SYSTEM: download / faq / order / whatsapp ===== */
+.download {
+    padding: 100px 0;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-light) 100%);
+}
+
+.download-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 48px 0;
+}
+
+.download-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+}
+
+.download-step h3 {
+    font-size: 20px;
+    margin: 12px 0 8px;
+}
+
+.download-step p {
+    color: var(--text-muted);
+    font-size: 15px;
+}
+
+.download-step code {
+    background: rgba(99, 102, 241, 0.15);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.download-cta {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.download-note {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+.faq {
+    padding: 100px 0;
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 40px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+}
+
+.faq-item summary {
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.faq-item p {
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.order-result {
+    margin-top: 28px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+}
+
+.order-result h3 {
+    font-size: 19px;
+    margin-bottom: 8px;
+}
+
+.order-pack {
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.order-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.order-next {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.copy-btn {
+    margin-top: 10px;
+    font-size: 13px;
+    padding: 8px 18px;
+}
+
+.whats-float {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+    z-index: 999;
 }
