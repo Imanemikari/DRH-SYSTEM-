@@ -1,11 +1,11 @@
 import {
   LayoutDashboard, Users, Building2, Calendar, CalendarOff,
-  Settings, ChevronLeft, ChevronRight, Sparkles, FileText, FileWarning, RefreshCcw, ClipboardCheck, Timer, FolderOpen, BarChart3
+  Settings, ChevronLeft, ChevronRight, Sparkles, FileText, FileWarning, RefreshCcw, ClipboardCheck, Timer, FolderOpen, BarChart3, Scale
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useTheme } from '../context/ThemeContext';
 
-type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'reports';
+type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'droit-cr' | 'reports';
 
 interface SidebarProps {
   currentPage: Page;
@@ -28,6 +28,7 @@ export default function Sidebar({ currentPage, navigateTo, collapsed, onToggle, 
     { id: 'attendance', labelKey: 'navAttendance', icon: Calendar },
     { id: 'pointage', labelKey: 'navPointage', icon: ClipboardCheck },
     { id: 'heures-supp', labelKey: 'navHeuresSupp', icon: Timer },
+    { id: 'droit-cr', labelKey: 'navDroitCr', icon: Scale },
     { id: 'leaves', labelKey: 'navLeaves', icon: CalendarOff },
     { id: 'contracts', labelKey: 'navContracts', icon: FileWarning },
     { id: 'rotation', labelKey: 'navDeplacement', icon: RefreshCcw },

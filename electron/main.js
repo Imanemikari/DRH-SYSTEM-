@@ -17,7 +17,7 @@ const DEMO_BLOCKED = new Set([
   'db:delete-document', 'db:delete-document-group', 'db:delete-employee', 'db:delete-leave',
   'db:generate-payroll', 'db:pay-salary', 'db:grant-rotation-leave', 'db:reorder-departments',
   'db:resolve-rotation-leave', 'db:restart-rotation-cycle', 'db:rename-document-group',
-  'db:set-heures-supp', 'db:set-pointage-cell', 'db:set-pointage-verso-field',
+  'db:set-heures-supp', 'db:set-droit-cr', 'db:set-pointage-cell', 'db:set-pointage-verso-field',
   'db:update-attendance', 'db:update-company-document', 'db:update-cumul-days',
   'db:update-department', 'db:update-deplacement-dates', 'db:update-deplacement-solde',
   'db:update-employee', 'db:update-employee-status', 'db:update-leave', 'db:update-settings',
@@ -316,6 +316,19 @@ async function initDatabase() {
       h50 REAL DEFAULT 0,
       h75 REAL DEFAULT 0,
       h100 REAL DEFAULT 0,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(year, month, employee_id),
+      FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS droit_cr (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      employee_id INTEGER NOT NULL,
+      year INTEGER NOT NULL,
+      month INTEGER NOT NULL,
+      days REAL DEFAULT 0,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(year, month, employee_id),
       FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
@@ -839,6 +852,35 @@ ipcMain.handle('db:set-heures-supp', (e, { employee_id, year, month, h50, h75, h
     runSql("UPDATE heures_supplementaires SET h50 = ?, h75 = ?, h100 = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [vals[0], vals[1], vals[2], row.id]);
   } else {
     runSql("INSERT INTO heures_supplementaires (employee_id, year, month, h50, h75, h100) VALUES (?, ?, ?, ?, ?, ?)", [employee_id, year, month, vals[0], vals[1], vals[2]]);
+  }
+  saveDb();
+  return { success: true };
+});
+
+// Droit de CR (conge de recuperation) — monthly entitlement days
+ipcMain.handle('db:get-droit-cr', (e, { year }) => {
+  const employees = queryAll("SELECT id, first_name, last_name, position, status, contract_type, matricule FROM employees WHERE status != 'terminated' ORDER BY last_name, first_name");
+  const rows = queryAll("SELECT employee_id, month, days FROM droit_cr WHERE year = ?", [year]);
+  const records = {};
+  rows.forEach(function(r) {
+    if (!records[r.employee_id]) records[r.employee_id] = {};
+    records[r.employee_id][r.month] = r.days || 0;
+  });
+  return { year, employees, records };
+});
+
+ipcMain.handle('db:set-droit-cr', (e, { employee_id, year, month, days }) => {
+  const v = Number(days) || 0;
+  const row = queryOne("SELECT id FROM droit_cr WHERE year = ? AND month = ? AND employee_id = ?", [year, month, employee_id]);
+  if (v <= 0) {
+    if (row) runSql("DELETE FROM droit_cr WHERE id = ?", [row.id]);
+    saveDb();
+    return { success: true };
+  }
+  if (row) {
+    runSql("UPDATE droit_cr SET days = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [v, row.id]);
+  } else {
+    runSql("INSERT INTO droit_cr (employee_id, year, month, days) VALUES (?, ?, ?, ?)", [employee_id, year, month, v]);
   }
   saveDb();
   return { success: true };

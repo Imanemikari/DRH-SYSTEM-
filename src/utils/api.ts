@@ -100,6 +100,10 @@ export const api = {
   getHeuresSupp: (year: number, month: number) => ipcRenderer?.invoke('db:get-heures-supp', { year, month }) || { employees: [], records: {} },
   setHeuresSupp: (employee_id: number, year: number, month: number, h50: number, h75: number, h100: number) => ipcRenderer?.invoke('db:set-heures-supp', { employee_id, year, month, h50, h75, h100 }),
 
+  // Droit de CR (conge de recuperation)
+  getDroitCr: (year: number) => ipcRenderer?.invoke('db:get-droit-cr', { year }) || { employees: [], records: {} },
+  setDroitCr: (employee_id: number, year: number, month: number, days: number) => ipcRenderer?.invoke('db:set-droit-cr', { employee_id, year, month, days }),
+
   // Notifications
   getNotifications: () => ipcRenderer?.invoke('db:get-notifications') || [],
   markNotificationsRead: () => ipcRenderer?.invoke('db:mark-notifications-read'),

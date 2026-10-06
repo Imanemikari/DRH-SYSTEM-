@@ -18,13 +18,14 @@ import Rotation from './pages/Rotation';
 import Reports from './pages/Reports';
 import PointageDetail from './pages/PointageDetail';
 import HeuresSupp from './pages/HeuresSupp';
+import DroitCR from './pages/DroitCR';
 import AIAssistant from './components/AIAssistant';
 import { useState, useEffect } from 'react';
 import { api } from './utils/api';
 import { isDemo } from './utils/demoGuard';
 import { useLang } from './context/LangContext';
 
-type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'reports';
+type Page = 'dashboard' | 'employees' | 'employee-detail' | 'departments' | 'attendance' | 'leaves' | 'contracts' | 'settings' | 'avendant' | 'documents' | 'rotation' | 'pointage' | 'heures-supp' | 'droit-cr' | 'reports';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('reports');
@@ -138,6 +139,8 @@ function AppContent() {
         return <PointageDetail navigateTo={navigateTo} />;
       case 'heures-supp':
         return <HeuresSupp navigateTo={navigateTo} />;
+      case 'droit-cr':
+        return <DroitCR navigateTo={navigateTo} />;
       default:
         return <Dashboard navigateTo={navigateTo} onAI={() => setShowAI(true)} />;
     }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Printer } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { makeSeal, sealFooterHtml } from '../utils/docSeal';
+import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 
 export interface PrintField {
   key: string;
