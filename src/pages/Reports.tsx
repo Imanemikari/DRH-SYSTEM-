@@ -262,7 +262,10 @@ export default function Reports({ navigateTo }: ReportsProps) {
           <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true"><div className="mirror-sweep" /></div>
         <div className="flex items-start justify-between flex-wrap gap-4 relative">
           <div className="flex items-center gap-3.5">
-            <img src="./logo.png" alt="DRH System" className="w-12 h-12 rounded-2xl shadow-lg shrink-0 ring-2 ring-[#f7c948]/70" />
+            <div className="relative shrink-0">
+              <div className="absolute -inset-2.5 rounded-[1.75rem] bg-[#f7c948]/35 blur-xl animate-pulse" />
+              <img src="./logo.png" alt="DRH System" className="relative w-20 h-20 rounded-3xl shadow-2xl ring-2 ring-[#ffe066] gold-glow" />
+            </div>
             <div>
               {companyName && <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300/90 font-semibold">{companyName}</p>}
               <h1 className="text-xl font-bold bank-stat-number">{t('repTitle')}</h1>
