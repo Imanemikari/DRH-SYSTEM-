@@ -48,6 +48,13 @@ export default function Settings({ navigateTo }: SettingsProps) {
     setTgToken(data?.telegram_bot_token || '');
     setTgChat(data?.telegram_chat_id || '');
     try { setBackups(await api.listBackups()); } catch { /* noop */ }
+    try { setAuditRows(await api.getAuditLog()); } catch { /* noop */ }
+    try {
+      const v: any = await api.getAppVersion();
+      if (v && v.version) setAppVer(v.version);
+      const s2: any = await api.getSettings();
+      setUpdRepo({ owner: s2?.update_owner || '', repo: s2?.update_repo || '', branch: s2?.update_branch || '', manifest: s2?.update_manifest_url || '' });
+    } catch { /* noop */ }
   };
 
   const persistAiLocal = (key: string, prov: string, model: string) => {
