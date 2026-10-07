@@ -133,6 +133,7 @@ const openQuick = (emp: any) => {
                     <p className={`text-xs mt-0.5 truncate ${isDark ? 'text-slate-400' : 'text-surface-500'}`}>{emp.position || emp.department_name || '-'} · {emp.contract_type || '-'}</p>
                     <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-surface-400'}`}>{t('empEndDate')}: {formatDate(emp.end_date)}</p>
                     <button onClick={(e) => { e.stopPropagation(); navigateTo('employees', emp.id); }} title={t('conViewFile')} className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#14305a] hover:text-[#f5a623] dark:!text-blue-400 dark:hover:!text-amber-300 transition-colors"><Eye className="w-3.5 h-3.5" /> {t('conViewFile')}</button>
+                    <button onClick={(e) => { e.stopPropagation(); openQuick(emp); }} title={t('conQuickEdit')} className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 hover:text-amber-500 dark:!text-amber-400 transition-colors"><Edit2 className="w-3.5 h-3.5" /> {t('empEdit')}</button>
                   </div>
                   <div className="text-left shrink-0">
 <div className="w-14 h-14 rounded-full flex flex-col items-center justify-center border-2 exp-circle border-red-400 text-red-500">
@@ -177,9 +178,9 @@ const openQuick = (emp: any) => {
                   const remaining = Math.ceil((new Date(emp.end_date).getTime() - new Date(todayStr).getTime()) / (1000 * 60 * 60 * 24));
                   const isExpired = remaining < 0;
                   return (
-                    <tr
+<tr
                       key={emp.id}
-                onClick={() => openQuick(emp)}
+                      onClick={() => openQuick(emp)}
                       className={`border-b cursor-pointer transition-all ${isDark ? 'border-slate-700 hover:bg-slate-700/50' : 'border-surface-50 hover:bg-surface-50'}`}
                     >
                       <td className={`py-2 px-2 font-medium ${isDark ? 'text-slate-200' : 'text-surface-700'}`}>{emp.matricule}</td>
