@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { api } from '../utils/api';
 import { useLang } from '../context/LangContext';
 import EmailSendButton from '../components/EmailSendButton';
+import { moveInTable } from '../utils/gridNav';
 import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 import { ChevronLeft, ChevronRight, RefreshCw, Trash2, CheckCircle2, Check, CalendarDays, Layers, MapPin, GalleryVertical, Printer, FileText, FileSpreadsheet, FileType, X } from 'lucide-react';
 
@@ -118,16 +119,36 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
 
   const handleCellClick = async (empId: number, date: string, current: string | undefined) => {
     const idx = CODE_CYCLE.indexOf(current || null);
-    const next = CODE_CYCLE[(idx + 1) % CODE_CYCLE.length];
+    await setCell(empId, date, CODE_CYCLE[(idx + 1) % CODE_CYCLE.length]);
+  };
+
+  const setCell = async (empId: number, date: string, code: string | null) => {
     const optimistic = { ...pointage };
-    if (next) {
+    if (code) {
       if (!optimistic[empId]) optimistic[empId] = {};
-      optimistic[empId][date] = next;
+      optimistic[empId][date] = code;
     } else if (optimistic[empId]) {
       delete optimistic[empId][date];
     }
     setPointage(optimistic);
-    await api.setPointageCell(empId, date, next || '');
+    await api.setPointageCell(empId, date, code || '');
+  };
+
+  const codeBuf = useRef('');
+  const codeTimer = useRef<any>(null);
+
+  const typeCode = (ch: string, empId: number, date: string) => {
+    const buf = (codeBuf.current + ch).toUpperCase();
+    const keys = CODES.map(c => c.key as string);
+    if (keys.includes(buf)) {
+      codeBuf.current = '';
+      setCell(empId, date, buf);
+      return;
+    }
+    if (keys.some(k => k.startsWith(buf))) codeBuf.current = buf;
+    else codeBuf.current = '';
+    clearTimeout(codeTimer.current);
+    codeTimer.current = setTimeout(() => { codeBuf.current = ''; }, 800);
   };
 
   const dayHeaders = useMemo(() => {
@@ -189,7 +210,7 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
             {loading && (
               <tr><td colSpan={daysInMonth + 1} className="px-4 py-12 text-center text-surface-400 text-sm">...</td></tr>
             )}
-            {!loading && emps.map(emp => (
+            {!loading && emps.map((emp, ri) => (
               <tr key={emp.id} className="table-row-hover transition-colors">
                 <td
                   className="sticky left-0 z-10 bg-white dark:!bg-slate-800 px-3 py-1.5 text-[12px] font-medium text-surface-800 whitespace-nowrap cursor-pointer"
@@ -197,15 +218,22 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
                 >
                   {emp.last_name} {emp.first_name}
                 </td>
-                {dayHeaders.map(h => {
+                {dayHeaders.map((h, ci) => {
                   const code = pointage[emp.id]?.[h.key];
                   const isTodayCell = isToday(h.key);
                   return (
                     <td key={h.key} className={`px-0.5 py-1 text-center ${isTodayCell ? 'bg-amber-50 dark:!bg-amber-500/10' : ''}`}>
                       <button
                         onClick={() => handleCellClick(emp.id, h.key, code)}
+                        onKeyDown={(e) => {
+                          if (moveInTable(e, ri, ci)) return;
+                          if (e.key === 'Backspace' || e.key === 'Delete') { setCell(emp.id, h.key, null); return; }
+                          if (/^[a-zA-Z]$/.test(e.key)) typeCode(e.key, emp.id, h.key);
+                        }}
+                        data-r={ri}
+                        data-c={ci}
                         title={`${emp.last_name} ${emp.first_name} — ${h.key}`}
-                        className={`w-7 h-7 rounded-lg border text-[10px] font-bold transition-all hover:ring-2 hover:ring-amber-400 cursor-pointer ${
+                        className={`w-7 h-7 rounded-lg border text-[10px] font-bold transition-all hover:ring-2 hover:ring-amber-400 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none cursor-pointer ${
                           code ? CODE_STYLE[code] : 'border-slate-200 dark:!border-slate-600 text-surface-300 dark:!text-slate-500 hover:!bg-surface-100 dark:hover:!bg-slate-700'
                         }`}
                       >
@@ -264,11 +292,11 @@ export default function PointageDetail({ navigateTo }: PointageProps) {
                   <td className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-surface-500 dark:text-slate-400 whitespace-nowrap">{emp.matricule || '-'}</td>
                   <td className="border border-slate-300 dark:border-slate-600 px-2 py-1.5 font-medium text-surface-800 dark:text-slate-200 whitespace-nowrap">{emp.last_name} {emp.first_name}</td>
                   <td className="border border-slate-300 dark:border-slate-600 px-2 py-1.5 text-surface-500 dark:text-slate-400 whitespace-nowrap text-[11.5px]">{emp.position || '-'}</td>
-                  {PRESENCE_CODES.map(c => (
-                    <td key={c} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-surface-700 dark:text-slate-200">{cnt[c] || 0}</td>
+                  {PRESENCE_CODES.map((c, ci) => (
+                    <td key={c} tabIndex={0} data-r={idx} data-c={ci} onKeyDown={(e) => { moveInTable(e, idx, ci); }} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-surface-700 dark:text-slate-200 focus:bg-amber-50 dark:focus:bg-amber-500/10 focus:outline-none">{cnt[c] || 0}</td>
                   ))}
-                  {ABSENCE_CODES.map(c => (
-                    <td key={c} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-surface-700 dark:text-slate-200">{cnt[c] || 0}</td>
+                  {ABSENCE_CODES.map((c, i) => (
+                    <td key={c} tabIndex={0} data-r={idx} data-c={PRESENCE_CODES.length + i} onKeyDown={(e) => { moveInTable(e, idx, PRESENCE_CODES.length + i); }} className="border border-slate-300 dark:border-slate-600 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-surface-700 dark:text-slate-200 focus:bg-amber-50 dark:focus:bg-amber-500/10 focus:outline-none">{cnt[c] || 0}</td>
                   ))}
                   <td className="border border-slate-300 dark:border-slate-600 bg-indigo-50/50 dark:bg-indigo-500/10 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-indigo-700 dark:text-indigo-300">{hs ? hs.h50 : 0}</td>
                   <td className="border border-slate-300 dark:border-slate-600 bg-indigo-50/50 dark:bg-indigo-500/10 px-1.5 py-1.5 text-center text-[12.5px] font-bold text-indigo-700 dark:text-indigo-300">{hs ? hs.h75 : 0}</td>

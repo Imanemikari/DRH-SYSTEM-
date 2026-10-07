@@ -4,6 +4,7 @@ import { useLang } from '../context/LangContext';
 import PrintPreviewModal, { PrintField } from '../components/PrintPreviewModal';
 import EmailSendButton from '../components/EmailSendButton';
 import { buildFieldTableHtml, buildFieldSheets } from '../utils/emailExport';
+import { moveInTable, focusCell } from '../utils/gridNav';
 import { ChevronLeft, ChevronRight, RefreshCw, CheckCircle2, MapPin, Printer } from 'lucide-react';
 
 interface DroitCRProps {
@@ -22,15 +23,24 @@ interface DCREmployee {
 
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-const dayInput = (empId: number, m: number, get: (id: number, mo: number) => number, update: (id: number, mo: number, v: number, saved: boolean) => void) => (
+const dayInput = (empId: number, ri: number, m: number, get: (id: number, mo: number) => number, update: (id: number, mo: number, v: number, saved: boolean) => void) => (
   <input
     type="number"
     min={0}
     step="0.5"
+    data-r={ri}
+    data-c={m - 1}
     value={get(empId, m) ?? 0}
     onChange={(e) => update(empId, m, parseFloat(e.target.value) || 0, false)}
     onBlur={() => update(empId, m, get(empId, m), true)}
-    onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+    onKeyDown={(e) => {
+      if (moveInTable(e, ri, m - 1)) return;
+      if (e.key === 'Enter') {
+        (e.target as HTMLInputElement).blur();
+        const t = (e.target as HTMLElement).closest?.('table');
+        focusCell(t, ri + 1, m - 1);
+      }
+    }}
     className="input-field !w-20 !py-1.5 !text-xs font-bold text-center"
   />
 );
@@ -115,7 +125,7 @@ export default function DroitCR({ navigateTo }: DroitCRProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-100">
-              {emps.map(emp => (
+              {emps.map((emp, ri) => (
                 <tr key={emp.id} className="table-row-hover transition-colors">
                   <td
                     className="sticky left-0 z-10 bg-white dark:!bg-slate-800 px-3 py-1.5 text-[12px] font-medium text-surface-800 dark:!text-slate-100 whitespace-nowrap cursor-pointer"
@@ -125,7 +135,7 @@ export default function DroitCR({ navigateTo }: DroitCRProps) {
                   </td>
                   <td className="px-3 py-1.5 text-xs text-surface-600 dark:!text-slate-300 whitespace-nowrap">{emp.position || '-'}</td>
                   {MONTHS.map(m => (
-                    <td key={m} className="px-1 py-1 text-center">{dayInput(emp.id, m, getDays, setDay)}</td>
+                    <td key={m} className="px-1 py-1 text-center">{dayInput(emp.id, ri, m, getDays, setDay)}</td>
                   ))}
                   <td className="px-3 py-1.5 text-center text-sm font-bold text-amber-600 dark:!text-amber-300 bg-amber-50/50 dark:!bg-amber-500/10 whitespace-nowrap">{totalYear(emp.id)}</td>
                 </tr>

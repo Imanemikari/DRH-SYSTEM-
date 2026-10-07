@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { useLang } from '../context/LangContext';
 import EmailSendButton from '../components/EmailSendButton';
+import { moveInTable, focusCell } from '../utils/gridNav';
 import { makeSeal, sealFooterHtml } from '../utils/docSeal';
 import { ChevronLeft, ChevronRight, RefreshCw, Timer, CheckCircle2, MapPin, Printer, FileText, FileSpreadsheet, FileType } from 'lucide-react';
 
@@ -25,15 +26,24 @@ interface HoursRecord {
   h100: number;
 }
 
-const nInput = (empId: number, field: 'h50' | 'h75' | 'h100', getRec: (id: number) => HoursRecord, update: (id: number, f: 'h50' | 'h75' | 'h100', v: number, saved: boolean) => void, accent: string) => (
+const nInput = (empId: number, ri: number, ci: number, field: 'h50' | 'h75' | 'h100', getRec: (id: number) => HoursRecord, update: (id: number, f: 'h50' | 'h75' | 'h100', v: number, saved: boolean) => void, accent: string) => (
   <input
     type="number"
     min={0}
     step="0.5"
+    data-r={ri}
+    data-c={ci}
     value={getRec(empId)[field] ?? 0}
     onChange={(e) => update(empId, field, parseFloat(e.target.value) || 0, false)}
     onBlur={() => update(empId, field, getRec(empId)[field], true)}
-    onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+    onKeyDown={(e) => {
+      if (moveInTable(e, ri, ci)) return;
+      if (e.key === 'Enter') {
+        (e.target as HTMLInputElement).blur();
+        const t = (e.target as HTMLElement).closest?.('table');
+        focusCell(t, ri + 1, ci);
+      }
+    }}
     className={`input-field !w-24 !py-1.5 !text-xs font-bold text-center ${accent}`}
   />
 );
@@ -130,9 +140,9 @@ export default function HeuresSupp({ navigateTo }: HeuresSuppProps) {
                       {emp.last_name} {emp.first_name}
                     </td>
                     <td className="px-3 py-2 text-surface-600 dark:!text-slate-300">{emp.position || '-'}</td>
-                    <td className="px-3 py-2 text-center">{nInput(emp.id, 'h50', getRecord, setField, 'dark:!text-blue-300 text-blue-700')}</td>
-                    <td className="px-3 py-2 text-center">{nInput(emp.id, 'h75', getRecord, setField, 'dark:!text-amber-300 text-amber-600')}</td>
-                    <td className="px-3 py-2 text-center">{nInput(emp.id, 'h100', getRecord, setField, 'dark:!text-violet-300 text-violet-700')}</td>
+                    <td className="px-3 py-2 text-center">{nInput(emp.id, i, 0, 'h50', getRecord, setField, 'dark:!text-blue-300 text-blue-700')}</td>
+                    <td className="px-3 py-2 text-center">{nInput(emp.id, i, 1, 'h75', getRecord, setField, 'dark:!text-amber-300 text-amber-600')}</td>
+                    <td className="px-3 py-2 text-center">{nInput(emp.id, i, 2, 'h100', getRecord, setField, 'dark:!text-violet-300 text-violet-700')}</td>
                     <td className="px-3 py-2 text-center">
                       <span className="inline-flex items-center gap-1 font-extrabold text-sm text-[#14305a] dark:!text-amber-300">
                         <Timer className="w-4 h-4" /> {total(r)}
