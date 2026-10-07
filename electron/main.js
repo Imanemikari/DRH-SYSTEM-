@@ -1985,6 +1985,14 @@ ipcMain.handle('license:generate', (e, { clientName, expiryDate, plan }) => {
 
 // ===== Auto-updater (full-package zip hosted on GitHub) =====
 const UPDATE_DEFAULTS = { owner: 'Imanemikari', repo: 'DRH-SYSTEM-', branch: 'main' };
+function appVersion() {
+  try {
+    const pj = require(path.join(__dirname, '..', 'package.json'));
+    if (pj && pj.version) return String(pj.version);
+  } catch (e) {}
+  try { return app.getVersion(); } catch (e) {}
+  return '0.0.0';
+}
 function updateConfig() {
   try {
     const rows = queryAll("SELECT key, value FROM settings WHERE key IN ('update_owner','update_repo','update_branch','update_manifest_url')");
@@ -2060,14 +2068,14 @@ function downloadFile(url, dest, timeoutMs) {
   })();
 }
 ipcMain.handle('updater:version', () => {
-  try { return { version: app.getVersion() }; } catch (e) { return { version: '0.0.0' }; }
+  try { return { version: appVersion() }; } catch (e) { return { version: '0.0.0' }; }
 });
 ipcMain.handle('updater:check', async () => {
   try {
     const c = updateConfig();
     const manifestUrl = c.manifest || ('https://raw.githubusercontent.com/' + c.owner + '/' + c.repo + '/' + c.branch + '/updates/latest.json');
     const data = await httpsGetJson(manifestUrl);
-    const cur = app.getVersion();
+    const cur = appVersion();
     return { success: true, current: cur, latest: data, available: !!(data && data.version && cmpVersions(data.version, cur) > 0), config: c };
   } catch (err) { return { success: false, error: String((err && err.message) || err) }; }
 });
