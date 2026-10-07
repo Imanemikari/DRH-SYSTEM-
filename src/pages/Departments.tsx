@@ -94,6 +94,7 @@ export default function Departments({ navigateTo }: DepartmentsProps) {
         <div className="page-title-bar">
           <span className="page-title-accent" />
           <div>
+            <p className="page-eyebrow">{t('pgDeptKicker')}</p>
             <h1 className="page-h1">{t('deptTitle')}</h1>
             <p className="page-h1-sub">{t('deptSubtitle')}</p>
           </div>

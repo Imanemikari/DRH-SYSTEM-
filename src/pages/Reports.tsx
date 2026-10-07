@@ -268,7 +268,7 @@ export default function Reports({ navigateTo }: ReportsProps) {
             </div>
             <div>
               {companyName && <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300/90 font-semibold">{companyName}</p>}
-              <h1 className="text-xl font-bold bank-stat-number">{t('repTitle')}</h1>
+              <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight bank-stat-number">{t('repTitle')}</h1>
               <p className="text-xs text-blue-200/80 mt-0.5">{t('repSubtitle')}</p>
             </div>
           </div>

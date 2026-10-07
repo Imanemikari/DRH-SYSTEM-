@@ -489,33 +489,81 @@
   }
 
   /* ===== PREMIUM PAGE HEADERS ===== */
+  @keyframes headerIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .page-title-bar {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
+    animation: headerIn 0.45s ease both;
   }
 
   .page-title-accent {
-    width: 4px;
-    height: 38px;
+    width: 5px;
+    height: 48px;
     border-radius: 999px;
     background: linear-gradient(180deg, #ffe066 0%, #f7c948 55%, #f5a623 100%);
     background-size: 220% 220%;
-    box-shadow: 0 0 12px rgba(247, 201, 72, 0.8);
+    box-shadow: 0 0 16px rgba(247, 201, 72, 0.85), 0 2px 8px rgba(245, 166, 35, 0.35);
     animation: goldSheen 3.5s ease-in-out infinite;
     flex-shrink: 0;
+    position: relative;
+  }
+
+  .page-title-accent::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 999px;
+  }
+
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #b45309;
+    margin-bottom: 3px;
+    line-height: 1;
+  }
+
+  .dark .page-eyebrow {
+    color: #ffd95e !important;
+    text-shadow: 0 0 12px rgba(247, 201, 72, 0.35);
+  }
+
+  [dir="rtl"] .page-eyebrow {
+    letter-spacing: 0.03em;
   }
 
   .page-h1 {
-    @apply text-2xl font-bold tracking-tight text-surface-800;
+    font-size: 29px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #1e293b;
+    text-wrap: balance;
   }
 
   .dark .page-h1 {
     color: #f1f5f9 !important;
+    text-shadow: 0 2px 18px rgba(20, 48, 90, 0.45);
   }
 
   .page-h1-sub {
-    @apply text-sm mt-1 text-surface-500;
+    font-size: 13.5px;
+    margin-top: 5px;
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.01em;
   }
 
   .dark .page-h1-sub {

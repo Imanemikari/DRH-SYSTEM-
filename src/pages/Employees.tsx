@@ -164,6 +164,7 @@ export default function Employees({ navigateTo }: EmployeesProps) {
         <div className="page-title-bar">
           <span className="page-title-accent" />
           <div>
+            <p className="page-eyebrow">{t('pgEmpKicker')}</p>
             <h1 className="page-h1">{t('empTitle')}</h1>
             <p className="page-h1-sub">{t('empSubtitle')}</p>
           </div>

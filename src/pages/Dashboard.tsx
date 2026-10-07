@@ -60,7 +60,8 @@ export default function Dashboard({ navigateTo, onAI }: DashboardProps) {
                 {new Intl.DateTimeFormat(lang === 'ar' ? 'ar-TN' : 'fr-TN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(today)}
               </span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">{t('navDashboard')}</h1>
+            <p className="page-eyebrow !text-amber-300/90">{t('pgDashKicker')}</p>
+            <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight">{t('navDashboard')}</h1>
             <p className="text-white/70 text-sm mt-1.5 max-w-xl">{t('dashWelcome')}</p>
 
             <div className="flex flex-wrap items-center gap-3 mt-6">
