@@ -499,6 +499,51 @@
     align-items: center;
     gap: 16px;
     animation: headerIn 0.45s ease both;
+    position: relative;
+  }
+
+  .page-title-bar::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(380px, 65%);
+    height: 150%;
+    background: radial-gradient(closest-side, rgba(247, 201, 72, 0.2), rgba(247, 201, 72, 0));
+    filter: blur(14px);
+    pointer-events: none;
+  }
+
+  .dark .page-title-bar::before {
+    background: radial-gradient(closest-side, rgba(247, 201, 72, 0.3), rgba(247, 201, 72, 0));
+  }
+
+  .page-title-bar > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-glow {
+    position: relative;
+  }
+
+  .hero-glow::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(420px, 70%);
+    height: 170%;
+    background: radial-gradient(closest-side, rgba(255, 224, 102, 0.16), rgba(255, 224, 102, 0));
+    filter: blur(16px);
+    pointer-events: none;
+  }
+
+  .hero-glow > * {
+    position: relative;
+    z-index: 1;
   }
 
   .page-title-accent {
