@@ -114,7 +114,7 @@ export default function Settings({ navigateTo }: SettingsProps) {
             <button onClick={handlePrintTest} className="btn-secondary"><Printer className="w-4 h-4" /> {t('setPrintTest')}</button>
           </div>
           <div className="flex items-center justify-between p-4 bg-slate-50 dark:!bg-slate-700/50 rounded-xl">
-            <div><p className="text-sm font-medium text-surface-700">{t('setVersion')}</p><p className="text-xs text-surface-400">{t('setVersionVal')}</p></div>
+            <div><p className="text-sm font-medium text-surface-700">{t('setVersion')}</p><p className="text-xs text-surface-400" dir="ltr">DRH System v{appVer || '...'}</p></div>
             <span className="badge badge-success">{t('setLatest')}</span>
           </div>
           <div className="flex items-center justify-between p-4 bg-slate-50 dark:!bg-slate-700/50 rounded-xl">
