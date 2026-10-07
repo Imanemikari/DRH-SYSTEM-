@@ -53,7 +53,7 @@ export default function Dashboard({ navigateTo, onAI }: DashboardProps) {
       <div className="bank-hero bank-hero-grid relative overflow-hidden rounded-3xl px-8 py-8 text-white shadow-premium">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
         <div className="relative flex flex-col lg:flex-row lg:items-center gap-6">
-          <div className="flex-1 hero-glow">
+          <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-medium tracking-wide uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

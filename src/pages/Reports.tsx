@@ -261,7 +261,7 @@ export default function Reports({ navigateTo }: ReportsProps) {
       <div className="bank-hero bank-hero-grid rounded-2xl p-5 sm:p-6 text-white shadow-premium relative z-10 animate-fadeIn">
           <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true"><div className="mirror-sweep" /></div>
         <div className="flex items-start justify-between flex-wrap gap-4 relative">
-          <div className="flex items-center gap-3.5 hero-glow">
+          <div className="flex items-center gap-3.5">
             <div className="relative shrink-0">
               <div className="absolute -inset-2.5 rounded-[1.75rem] bg-[#f7c948]/35 blur-xl animate-pulse" />
               <img src="./logo.png" alt="DRH System" className="relative w-20 h-20 rounded-3xl shadow-2xl ring-2 ring-[#ffe066] gold-glow" />
