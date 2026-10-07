@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useLang } from '../context/LangContext';
 import { useTheme } from '../context/ThemeContext';
 import { useHelpers } from '../utils/helpers';
-import { FileWarning, CalendarX2, BellRing, RefreshCw, ArrowRight, ArrowDownAZ } from 'lucide-react';
+import { FileWarning, CalendarX2, BellRing, RefreshCw, ArrowRight, ArrowDownAZ, X, Edit2, Eye } from 'lucide-react';
 
 interface ContractsProps {
   navigateTo: (page: string, id?: number) => void;
@@ -17,6 +17,17 @@ export default function Contracts({ navigateTo }: ContractsProps) {
   const [expiring, setExpiring] = useState<any[]>([]);
   const [allContracts, setAllContracts] = useState<any[]>([]);
   const [sortAZ, setSortAZ] = useState(false);
+  const [quickEmp, setQuickEmp] = useState<any>(null);
+  const [quickHire, setQuickHire] = useState('');
+  const [quickEnd, setQuickEnd] = useState('');
+  const [quickTermEnd, setQuickTermEnd] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
 
   const loadData = async () => {
     const exp = await api.getContractsExpiring();
@@ -28,6 +39,46 @@ export default function Contracts({ navigateTo }: ContractsProps) {
 
   useEffect(() => { loadData(); }, []);
 
+const openQuick = (emp: any) => {
+    setQuickEmp(emp);
+    setQuickHire(emp.hire_date || '');
+    setQuickEnd(emp.end_date || '');
+    setQuickTermEnd(emp.end_date || '');
+  };
+
+  const handleQuickSave = async () => {
+    if (!quickEmp || saving) return;
+    setSaving(true);
+    try {
+      const full = await api.getEmployee(quickEmp.id);
+      if (full) {
+        full.hire_date = quickHire;
+        full.end_date = quickEnd;
+        await api.updateEmployee(full);
+        setQuickEmp(null);
+        loadData();
+        showToast(String(t('conSaved')));
+      }
+    } catch { /* noop */ }
+    setSaving(false);
+  };
+
+  const handleTerminate = async () => {
+    if (!quickEmp || saving) return;
+    setSaving(true);
+    try {
+      const full = await api.getEmployee(quickEmp.id);
+      if (full) {
+        full.status = 'terminated';
+        if (quickTermEnd) full.end_date = quickTermEnd;
+        await api.updateEmployee(full);
+        setQuickEmp(null);
+        loadData();
+        showToast(String(t('conSaved')));
+      }
+    } catch { /* noop */ }
+    setSaving(false);
+  };
   const todayStr = new Date().toISOString().split('T')[0];
   const sortedContracts = sortAZ ? [...allContracts].sort((a, b) => (a.last_name || '').localeCompare(b.last_name || '', 'fr')) : allContracts;
   const soonSorted = sortedContracts.filter((c: any) => c.end_date >= todayStr);
@@ -81,6 +132,7 @@ export default function Contracts({ navigateTo }: ContractsProps) {
                     <p className={`text-sm font-semibold truncate ${isDark ? 'text-slate-100' : 'text-surface-800'}`}>{emp.last_name} {emp.first_name}</p>
                     <p className={`text-xs mt-0.5 truncate ${isDark ? 'text-slate-400' : 'text-surface-500'}`}>{emp.position || emp.department_name || '-'} · {emp.contract_type || '-'}</p>
                     <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-surface-400'}`}>{t('empEndDate')}: {formatDate(emp.end_date)}</p>
+                    <button onClick={(e) => { e.stopPropagation(); navigateTo('employees', emp.id); }} title={t('conViewFile')} className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#14305a] hover:text-[#f5a623] dark:!text-blue-400 dark:hover:!text-amber-300 transition-colors"><Eye className="w-3.5 h-3.5" /> {t('conViewFile')}</button>
                   </div>
                   <div className="text-left shrink-0">
 <div className="w-14 h-14 rounded-full flex flex-col items-center justify-center border-2 exp-circle border-red-400 text-red-500">
@@ -127,7 +179,7 @@ export default function Contracts({ navigateTo }: ContractsProps) {
                   return (
                     <tr
                       key={emp.id}
-                      onClick={() => navigateTo('employees', emp.id)}
+                onClick={() => openQuick(emp)}
                       className={`border-b cursor-pointer transition-all ${isDark ? 'border-slate-700 hover:bg-slate-700/50' : 'border-surface-50 hover:bg-surface-50'}`}
                     >
                       <td className={`py-2 px-2 font-medium ${isDark ? 'text-slate-200' : 'text-surface-700'}`}>{emp.matricule}</td>
@@ -158,6 +210,48 @@ export default function Contracts({ navigateTo }: ContractsProps) {
           </div>
         )}
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="glass-card px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-emerald-600 dark:!text-emerald-300 flex items-center gap-2">
+            <Edit2 className="w-4 h-4" /> {toast}
+          </div>
+        </div>
+      )}
+
+      {quickEmp && (
+        <div className="modal-overlay" onClick={() => !saving && setQuickEmp(null)}>
+          <div className="modal-content w-full max-w-sm p-6 animate-scaleIn" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-base font-bold text-surface-800 dark:!text-slate-100">{quickEmp.last_name} {quickEmp.first_name}</h3>
+              <button onClick={() => !saving && setQuickEmp(null)} className="p-2 hover:bg-surface-100 dark:hover:!bg-slate-700 rounded-lg"><X className="w-4 h-4" /></button>
+            </div>
+            <p className="text-xs text-surface-500 dark:!text-slate-400 mb-5">{quickEmp.matricule || ''} · {quickEmp.position || '-'} · {quickEmp.contract_type || '-'}</p>
+
+            <p className="text-xs font-bold uppercase tracking-wide text-surface-500 dark:!text-slate-400 mb-2">{t('conQuickEdit')}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="label-field">{t('empHireDate')}</label><input type="date" value={quickHire} onChange={(e) => setQuickHire(e.target.value)} className="input-field" /></div>
+              <div><label className="label-field">{t('empEndDate')}</label><input type="date" value={quickEnd} onChange={(e) => setQuickEnd(e.target.value)} className="input-field" /></div>
+            </div>
+            <button onClick={handleQuickSave} disabled={saving} className="btn-primary w-full justify-center mt-3 disabled:opacity-50">
+              <Edit2 className="w-4 h-4" /> {t('empUpdate')}
+            </button>
+
+            <div className="my-4 border-t border-surface-100 dark:!border-slate-700" />
+
+            <p className="text-xs font-bold uppercase tracking-wide text-surface-500 dark:!text-slate-400 mb-1">{t('conTerminate')}</p>
+            <p className="text-[11px] text-surface-400 dark:!text-slate-500 mb-2">{t('conTerminateHint')}</p>
+            <div className="flex gap-2">
+              <div className="flex-1"><label className="label-field">{t('empEndDate')}</label><input type="date" value={quickTermEnd} onChange={(e) => setQuickTermEnd(e.target.value)} className="input-field" /></div>
+              <div className="flex items-end">
+                <button onClick={handleTerminate} disabled={saving} className="btn-danger disabled:opacity-50">
+                  <CalendarX2 className="w-4 h-4" /> {t('conTerminate')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

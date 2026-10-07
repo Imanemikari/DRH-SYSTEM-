@@ -354,6 +354,11 @@ export const translations: Record<Language, Record<string, string | string[]>> =
     conWarning: 'Bientôt expiré',
     conRenewed: 'Renouvellement de contrat',
     conActualiser: 'Actualiser',
+    conQuickEdit: 'Modification rapide du contrat',
+    conTerminate: 'Terminé',
+    conTerminateHint: 'Clôturer définitivement le contrat',
+    conSaved: 'Enregistré',
+    conViewFile: 'Dossier complet',
 
     // Pointage détaillé (P/CR/CA/JF)
     pdTitle: 'Pointage détaillé',
@@ -919,6 +924,11 @@ export const translations: Record<Language, Record<string, string | string[]>> =
     conWarning: 'وشيك الانتهاء',
     conRenewed: 'تجديد العقد',
     conActualiser: 'تحديث',
+    conQuickEdit: 'تعديل سريع للعقد',
+    conTerminate: 'منتهي',
+    conTerminateHint: 'إنهاء العقد نهائياً',
+    conSaved: 'تم الحفظ',
+    conViewFile: 'الملف الكامل',
 
     // Pointage détaillé (P/CR/CA/JF)
     pdTitle: 'نقطة التفصيلي',
@@ -1484,6 +1494,11 @@ export const translations: Record<Language, Record<string, string | string[]>> =
     conWarning: 'Expiring soon',
     conRenewed: 'Contract renewal',
     conActualiser: 'Refresh',
+    conQuickEdit: 'Quick contract edit',
+    conTerminate: 'Terminated',
+    conTerminateHint: 'End the contract permanently',
+    conSaved: 'Saved',
+    conViewFile: 'Full file',
 
     // Detailed Pointage (P/CR/CA/JF)
     pdTitle: 'Detailed Pointage',
