@@ -5,7 +5,7 @@ const path = require('path');
 
 const LICENSE_DIR = path.join(process.env.APPDATA || process.env.HOME, '.drh');
 const LICENSE_FILE = path.join(LICENSE_DIR, 'license.key');
-const SECRET = 'DRH-2026-SOFT-KEY';
+const SECRET = 'DRH-2027-VAULT-X9';
 
 function getMachineId() {
     try {
@@ -42,7 +42,7 @@ function generateLicenseKey(clientName, expiryDate, plan) {
     return groupSerial(raw);
 }
 
-const MASTER_KEY = 'DRH-TOUMI-OWNER-2026';
+const MASTER_KEY = 'DRH-TOUMI-OWNER-2027';
 
 function validateLicenseKey(key) {
     try {
